@@ -83,7 +83,7 @@ class PrmtopLoad(object):
                 NPHB,   IFPERT, NBPER,  NGPER,  NDPER, MBPER,
                 MGPER,  MDPER,  IFBOX,  NMXRS, IFCAP, NUMEXTRA """.replace(",", " ").replace("\n", " ").split()
         
-        self._parameters["POINTERS"] = [ pointers_key[i] : self._parameters["POINTERS"][i] for i in range(len(pointers_key)) ]
+        self._parameters["POINTERS"] = { pointers_key[i] : self._parameters["POINTERS"][i] for i in range(len(pointers_key)) }
         return None 
     
     def _set_resname_and_order(self):
@@ -373,5 +373,18 @@ def write_box( grid, pdb_file_name ):
     out_pdb.close()
     return None
 
+#
 if __name__ == "__main__":
     # do some test
+    prmtop_file = "../examples/amber/t4_lysozyme/receptor_579.prmtop"
+    inpcrd_file = "../examples/amber/t4_lysozyme/receptor_579.inpcrd"
+
+    prmtop_obj = PrmtopLoad(prmtop_file)
+    print prmtop_obj.get_all_parameters() 
+    print prmtop_obj.get_parm_for_grid_calculation()
+    print prmtop_obj.get_natoms()
+
+    inpcrd_obj = InpcrdLoad(inpcrd_file)
+    print inpcrd_obj.get_coordinates()
+
+
