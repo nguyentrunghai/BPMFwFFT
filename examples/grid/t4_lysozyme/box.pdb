@@ -1,0 +1,16 @@
+ATOM      1  DU1 BOX     1       0.000   0.000   0.000
+ATOM      2  DU2 BOX     1       0.000   0.000  16.000
+ATOM      3  DU3 BOX     1       0.000  16.000   0.000
+ATOM      4  DU4 BOX     1       0.000  16.000  16.000
+ATOM      5  DU5 BOX     1      16.000   0.000   0.000
+ATOM      6  DU6 BOX     1      16.000   0.000  16.000
+ATOM      7  DU7 BOX     1      16.000  16.000   0.000
+ATOM      8  DU8 BOX     1      16.000  16.000  16.000
+CONECT    1    2    3    5
+CONECT    2    1    4    6
+CONECT    3    1    4    7
+CONECT    4    2    3    8
+CONECT    5    1    6    7
+CONECT    6    2    5    8
+CONECT    7    3    5    8
+CONECT    8    4    6    7
