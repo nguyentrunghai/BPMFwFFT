@@ -585,4 +585,28 @@ class PostProcess_PL(PostProcess):
         return None
 
 #-----
+if __name__ == "__main__":
+    rec_prmtop          = "../examples/amber/t4_lysozyme/receptor_579.prmtop"
+    lig_prmtop          = "../examples/amber/benzene/ligand.prmtop"
+    complex_prmtop      = "../examples/amber/t4_benzene_complex/complex_579.prmtop"
+    sampling_nc_file    = "../examples/fft_sampling/t4_benzene/fft_sampling.nc"
+    solvent_phases      = ["OpenMM_OBC2"]
+    nr_resampled_complexes  = 100
+    randomly_translate_complex  = False
+    temperature         = 300
+    sander_tmp_dir      = "../examples/postprocessing"
 
+    rec_pdb_out     = "../examples/postprocessing/receptor.pdb"
+    lig_pdb_out     = "../examples/postprocessing/ligand.pdb"
+    bpmf_pkl_out    = "../examples/postprocessing/results.pkl"
+
+    post_pro = PostProcess_PL(rec_prmtop, lig_prmtop, complex_prmtop,
+                                sampling_nc_file,
+                                solvent_phases,
+                                nr_resampled_complexes, randomly_translate_complex,
+                                temperature,
+                                sander_tmp_dir)
+    post_pro.write_rececptor_pdb(rec_pdb_out)
+    post_pro.write_resampled_ligand_pdb(lig_pdb_out)
+    post_pro.pickle_bpmf(bpmf_pkl_out)
+    print "DONE"

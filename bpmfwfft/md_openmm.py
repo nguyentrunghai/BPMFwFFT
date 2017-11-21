@@ -13,7 +13,7 @@ import simtk.openmm
 import simtk.openmm.app
 import simtk.unit
 
-from Rotation import random_rotation
+from rotation import random_rotation
 
 openmm_solvent_models = {  "OpenMM_Gas":None,
                             "OpenMM_GBn":simtk.openmm.app.GBn,
