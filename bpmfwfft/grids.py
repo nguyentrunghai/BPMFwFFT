@@ -444,7 +444,7 @@ class RecGrid(Grid):
                         bsite_file,
                         grid_nc_file,
                         new_calculation=False,
-                        spacing=0.25, buffer=3.0):
+                        spacing=0.25, extra_buffer=3.0):
         """
         prmtop_file_name:   str.
         lj_sigma_scaling_factor:    float
@@ -472,7 +472,7 @@ class RecGrid(Grid):
                 self._initialize_convenient_para()
             else:
                 print "No binding site specified, box encloses the whole receptor"
-                self._cal_grid_parameters_without_bsite(spacing, buffer, nc_handle)
+                self._cal_grid_parameters_without_bsite(spacing, extra_buffer, nc_handle)
                 self._cal_grid_coordinates(nc_handle)
                 self._initialize_convenient_para()
                 self._move_receptor_to_grid_center()
@@ -569,13 +569,13 @@ class RecGrid(Grid):
             self._write_to_nc(nc_handle, key, self._grid[key])
         return None
     
-    def _cal_grid_parameters_without_bsite(self, spacing, buffer, nc_handle):
+    def _cal_grid_parameters_without_bsite(self, spacing, extra_buffer, nc_handle):
         """
         use this when making box encompassing the whole receptor
         spacing:    float, unit in angstrom, the same in x, y, z directions
-        buffer: float
+        extra_buffer: float
         """
-        assert spacing > 0 and buffer > 0, "spacing and buffer must be positive"
+        assert spacing > 0 and extra_buffer > 0, "spacing and extra_buffer must be positive"
         self._set_grid_key_value("origin", np.zeros( [3], dtype=float))
         
         self._set_grid_key_value("d0", np.array([spacing, 0, 0], dtype=float))
@@ -589,9 +589,9 @@ class RecGrid(Grid):
         dz = (self._crd[:,2] + lj_radius).max() - (self._crd[:,2] - lj_radius).min()
 
         print "Receptor enclosing box [%f, %f, %f]"%(dx, dy, dz)
-        print "Extra buffer: %f"%buffer
+        print "extra_buffer: %f"%extra_buffer
 
-        length = max([dx, dy, dz]) + 2.0*buffer
+        length = max([dx, dy, dz]) + 2.0*extra_buffer
         count = np.ceil(length / spacing) + 1
         
         self._set_grid_key_value("counts", np.array([count]*3, dtype=int))
