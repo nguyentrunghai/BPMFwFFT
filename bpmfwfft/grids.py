@@ -11,6 +11,22 @@ from util import c_cal_potential_grid
 
 
 
+def is_nc_grid_good(nc_grid_file):
+    if not os.path.exists(nc_grid_file):
+        return False
+
+    if os.path.getsize(nc_grid_file) == 0:
+        return False
+
+    nc_handle = nc.Dataset(nc_grid_file, "r")
+    nc_keys = nc_handle.variables.keys()
+    grid_keys = Grid().get_allowed_keys()
+    for key in grid_keys:
+        if key not in nc_keys:
+            return False
+    return True
+
+
 class Grid:
     """
     an abstract class that defines some common methods and data atributes 
