@@ -18,7 +18,7 @@ def is_nc_grid_good(nc_grid_file):
     if os.path.getsize(nc_grid_file) == 0:
         return False
 
-    nc_handle = nc.Dataset(nc_grid_file, "r")
+    nc_handle = netCDF4.Dataset(nc_grid_file, "r")
     nc_keys = nc_handle.variables.keys()
     grid_keys = Grid().get_allowed_keys()
     for key in grid_keys:
