@@ -2,7 +2,6 @@
 to calculate receptor grids
 """
 import sys
-import os
 import argparse
 
 import netCDF4 as nc
