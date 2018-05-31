@@ -2,20 +2,19 @@
 This is to generate interaction energies and corresponding translational vectors, 
 given a fixed receptor and an ensemble of ligand coordinates (including rotations and/or configurations)
 """
-import os
+from __future__ import print_function
 
 import numpy as np
 import netCDF4
 
 from grids import RecGrid
 from grids import LigGrid
-from rotation import random_rotation
 
-KB = 8.3144621E-3/4.184
 
-class Sampling:
-    """
-    """
+KB = 0.001987204134799235
+
+
+class Sampling(object):
     def __init__(self, rec_prmtop, lj_sigma_scal_fact, rec_inpcrd, 
                         bsite_file, grid_nc_file,
                         lig_prmtop, lig_inpcrd,
@@ -24,19 +23,18 @@ class Sampling:
                         output_nc,
                         temperature=300.):
         """
-        rec_prmtop: str, name of receptor prmtop file
-        lj_sigma_scal_fact: float, used to check consitency when loading receptor and ligand grids
-        rec_inpcrd: str, name of receptor inpcrd file
-        bsite_file: None or str, name of file defining the box, the same as "measured_binding_site.py"
-                                    from AlGDock pipeline.
-        grid_nc_file:   str, name of receptor precomputed grid netCDF file
-
-        lig_prmtop: str, name of ligand prmtop file
-        lig_inpcrd: str, name of ligand inpcrd file
-
-        lig_coord_ensemble: list of 2-array, each 2-array is an ligand coordinate
-        energy_sample_size_per_ligand:  int, number of energies and translational vectors to store for each ligand crd
-        output_nc:  str, name of nc file
+        :param rec_prmtop: str, name of receptor prmtop file
+        :param lj_sigma_scal_fact: float, used to check consitency when loading receptor and ligand grids
+        :param rec_inpcrd: str, name of receptor inpcrd file
+        :param bsite_file: None or str, name of file defining the box, the same as
+        from AlGDock pipeline. "measured_binding_site.py"
+        :param grid_nc_file: str, name of receptor precomputed grid netCDF file
+        :param lig_prmtop: str, name of ligand prmtop file
+        :param lig_inpcrd: str, name of ligand inpcrd file
+        :param lig_coord_ensemble: list of 2d array, each array is an ligand coordinate
+        :param energy_sample_size_per_ligand: int, number of energies and translational vectors to store for each ligand crd
+        :param output_nc: str, name of nc file
+        :param temperature: float
         """
         self._energy_sample_size_per_ligand = energy_sample_size_per_ligand
         self._beta = 1./ temperature / KB
@@ -71,8 +69,6 @@ class Sampling:
         return ensemble
 
     def _initialize_nc(self, output_nc):
-        """
-        """
         nc_handle = netCDF4.Dataset(output_nc, mode="w", format="NETCDF4")
 
         nc_handle.createDimension("three", 3)
@@ -158,7 +154,7 @@ class Sampling:
         return None
 
     def _do_fft(self, step):
-        print "Doing FFT for step %d"%step
+        print("Doing FFT for step %d"%step)
         lig_conf = self._lig_coord_ensemble[step]
         self._lig_grid.cal_grids(molecular_coord = lig_conf)
 
@@ -166,7 +162,7 @@ class Sampling:
         self._mean_energy = energies.mean()
         self._min_energy  = energies.min()
         self._energy_std  = energies.std()
-        print "Number of finite energy samples", energies.shape[0]
+        print("Number of finite energy samples", energies.shape[0])
 
         exp_energies = -self._beta * energies
         self._log_of_divisor = exp_energies.max()
@@ -196,13 +192,13 @@ class Sampling:
         for step in range(self._lig_coord_ensemble.shape[0]):
             self._do_fft(step)
 
-            print "Min energy", self._min_energy
-            print "Mean energy", self._mean_energy
-            print "STD energy", self._energy_std
-            print "Initial center of mass", self._lig_grid.get_initial_com()
-            print "Grid volume", self._lig_grid.get_box_volume()
-            print "Number of translations", self._lig_grid.get_number_translations()
-            print "-------------------------------\n\n"
+            print("Min energy", self._min_energy)
+            print("Mean energy", self._mean_energy)
+            print("STD energy", self._energy_std)
+            print("Initial center of mass", self._lig_grid.get_initial_com())
+            print("Grid volume", self._lig_grid.get_box_volume())
+            print("Number of translations", self._lig_grid.get_number_translations())
+            print("-------------------------------\n\n")
 
         self._nc_handle.close()
         return None
@@ -217,6 +213,7 @@ class Sampling:
 #           0< len(meaningful energies) <= resample size
 #           len(meaningful energies) > resample size
 #
+
 
 class Sampling_PL(Sampling):
     
@@ -305,13 +302,13 @@ class Sampling_PL(Sampling):
         return None
 
     def _do_fft(self, step):
-        print "Doing FFT for step %d"%step
+        print("Doing FFT for step %d"%step)
         lig_conf = self._lig_coord_ensemble[step]
         self._lig_grid.cal_grids(molecular_coord = lig_conf)
 
         energies = self._lig_grid.get_meaningful_energies()
         self._nr_finite_energy = energies.shape[0]
-        print "Number of finite energy samples", self._nr_finite_energy
+        print("Number of finite energy samples", self._nr_finite_energy)
 
         if energies.shape[0] > 0:
 
