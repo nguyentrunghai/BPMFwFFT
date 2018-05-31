@@ -1,4 +1,6 @@
 
+from __future__ import print_function
+
 import os
 
 import numpy as np
@@ -10,8 +12,11 @@ from util import c_cal_charge_grid
 from util import c_cal_potential_grid
 
 
-
 def is_nc_grid_good(nc_grid_file):
+    """
+    :param nc_grid_file: name of nc file
+    :return: bool
+    """
     if not os.path.exists(nc_grid_file):
         return False
 
@@ -27,7 +32,7 @@ def is_nc_grid_good(nc_grid_file):
     return True
 
 
-class Grid:
+class Grid(object):
     """
     an abstract class that defines some common methods and data atributes 
     working implementations are in LigGrid and RecGrid below
@@ -59,19 +64,20 @@ class Grid:
         value:  any object
         """
         assert key in self._grid_allowed_keys, key + " is not an allowed key"
-        print "setting " + key
+        print("setting " + key)
         if key not in self._grid_func_names:
-            print value
+            print(value)
         self._grid[key] = value
         return None
     
     def _load_prmtop(self, prmtop_file_name, lj_sigma_scaling_factor):
         """
-        prmtop_file_name:   str.
-        lj_sigma_scaling_factor:    float, must have value in [0.5, 1.0].
-                                    It is stored in self._grid["lj_sigma_scaling_factor"] as 
-                                    a array of shape [1] for reason of saving to nc file.
-                                    Experience says that 0.8 is good for protein-ligand calculations.
+        :param prmtop_file_name: str, name of AMBER prmtop file
+        :param lj_sigma_scaling_factor: float, must have value in [0.5, 1.0].
+        It is stored in self._grid["lj_sigma_scaling_factor"] as
+        a array of shape (1,) for reason of saving to nc file.
+         Experience says that 0.8 is good for protein-ligand calculations.
+        :return: None
         """
         assert 0.5 <= lj_sigma_scaling_factor <= 1.0, "lj_sigma_scaling_factor is out of allowed range"
         self._prmtop = IO.PrmtopLoad(prmtop_file_name).get_parm_for_grid_calculation()
@@ -80,9 +86,6 @@ class Grid:
         return None
     
     def _load_inpcrd(self, inpcrd_file_name):
-        """
-        inpcrd_file_name:   str
-        """
         self._crd = IO.InpcrdLoad(inpcrd_file_name).get_coordinates()
         natoms = self._prmtop["POINTERS"]["NATOM"]
         if (self._crd.shape[0] != natoms) or (self._crd.shape[1] != 3):
@@ -140,8 +143,9 @@ class Grid:
 
     def _is_in_grid(self, atom_coordinate):
         """
-        atom_coordinate:    3-array of float
-        in grid means atom_coordinate >= origin_crd and atom_coordinate < uper_most_corner_crd 
+        in grid means atom_coordinate >= origin_crd and atom_coordinate < uper_most_corner_crd
+        :param atom_coordinate: 3-array of float
+        :return: bool
         """
         return c_is_in_grid(atom_coordinate, self._origin_crd, self._uper_most_corner_crd)
     
@@ -201,10 +205,10 @@ class LigGrid(Grid):
     def __init__(self, prmtop_file_name, lj_sigma_scaling_factor, 
                        inpcrd_file_name, receptor_grid):
         """
-        prmtop_file_name:   str.
-        lj_sigma_scaling_factor:    float.
-        inpcrd_file_name:    str.
-        receptor_grid:  an object of RecGrid.
+        :param prmtop_file_name: str, name of AMBER prmtop file
+        :param lj_sigma_scaling_factor: float
+        :param inpcrd_file_name: str, name of AMBER coordinate file
+        :param receptor_grid: an instance of RecGrid class.
         """
         Grid.__init__(self)
         grid_data = receptor_grid.get_grids()
@@ -213,7 +217,7 @@ class LigGrid(Grid):
                                 lj_sigma_scaling_factor, grid_data["lj_sigma_scaling_factor"][0]))
         
         entries = [key for key in grid_data.keys() if key not in self._grid_func_names]
-        print "Copy entries from receptor_grid", entries
+        print("Copy entries from receptor_grid", entries)
         for key in entries:
             self._set_grid_key_value(key, grid_data[key])
         self._initialize_convenient_para()
@@ -273,7 +277,8 @@ class LigGrid(Grid):
 
     def _cal_corr_func(self, grid_name):
         """
-        grid_name: str
+        :param grid_name: str
+        :return: fft correlation function
         """
         assert grid_name in self._grid_func_names, "%s is not an allowed grid name"%grid_name
         grid = self._cal_charge_grid(grid_name)
@@ -288,8 +293,6 @@ class LigGrid(Grid):
         return corr_func
 
     def _do_forward_fft(self, grid_name):
-        """
-        """
         assert grid_name in self._grid_func_names, "%s is not an allowed grid name"%grid_name
         grid = self._cal_charge_grid(grid_name)
         self._set_grid_key_value(grid_name, grid)
@@ -299,7 +302,8 @@ class LigGrid(Grid):
 
     def _cal_corr_funcs(self, grid_names):
         """
-        grid_names  :   list of str
+        :param grid_names: list of str
+        :return:
         """
         assert type(grid_names) == list, "grid_names must be a list"
 
@@ -314,7 +318,6 @@ class LigGrid(Grid):
         corr_func = np.fft.ifftn(corr_func)
         corr_func = np.real(corr_func)
         return corr_func
-
 
     def _cal_energies(self):
         """
@@ -462,14 +465,15 @@ class RecGrid(Grid):
                         new_calculation=False,
                         spacing=0.25, extra_buffer=3.0):
         """
-        prmtop_file_name:   str.
-        lj_sigma_scaling_factor:    float
-        inpcrd_file_name:    str.
-        bsite_file: str or None, name of a file defining the box dimension.
-                                This file is the same as "measured_binding_site.py" from AlGDock pipeline.
-        grid_nc_file:   str, name of grid nc file
-        new_calculation:    bool, if True do the new grid calculation else load data in grid_nc_file.
-        spacing:    float and in angstrom.
+        :param prmtop_file_name: str, name of AMBER prmtop file
+        :param lj_sigma_scaling_factor: float
+        :param inpcrd_file_name: str, name of AMBER coordinate file
+        :param bsite_file: str or None, if not None, name of a file defining the box dimension.
+        This file is the same as "measured_binding_site.py" from AlGDock pipeline.
+        :param grid_nc_file: str, name of grid nc file
+        :param new_calculation: bool, if True do the new grid calculation else load data in grid_nc_file.
+        :param spacing: float and in angstrom.
+        :param extra_buffer: float
         """
         Grid.__init__(self)
         self._load_prmtop(prmtop_file_name, lj_sigma_scaling_factor)
@@ -482,12 +486,12 @@ class RecGrid(Grid):
                                 np.array([lj_sigma_scaling_factor], dtype=float))
 
             if bsite_file is not None:
-                print "Rececptor is assumed to be correctely translated such that box encloses binding pocket."
+                print("Rececptor is assumed to be correctely translated such that box encloses binding pocket.")
                 self._cal_grid_parameters_with_bsite(spacing, bsite_file, nc_handle)
                 self._cal_grid_coordinates(nc_handle)
                 self._initialize_convenient_para()
             else:
-                print "No binding site specified, box encloses the whole receptor"
+                print("No binding site specified, box encloses the whole receptor")
                 self._cal_grid_parameters_without_bsite(spacing, extra_buffer, nc_handle)
                 self._cal_grid_coordinates(nc_handle)
                 self._initialize_convenient_para()
@@ -507,7 +511,7 @@ class RecGrid(Grid):
         """
         assert os.path.isfile(grid_nc_file), "%s does not exist" %grid_nc_file
 
-        print grid_nc_file
+        print(grid_nc_file)
         nc_handle = netCDF4.Dataset(grid_nc_file, "r")
         keys = [key for key in self._grid_allowed_keys if key not in self._grid_func_names]
         for key in keys:
@@ -535,12 +539,12 @@ class RecGrid(Grid):
     def _cal_FFT(self, name):
         if name not in self._grid_func_names:
             raise RuntimeError("%s is not allowed.")
-        print "Doing FFT for %s"%name
+        print("Doing FFT for %s"%name)
         FFT = np.fft.fftn(self._grid[name])
         return FFT
 
     def _write_to_nc(self, nc_handle, key, value):
-        print "Writing %s into nc file"%key
+        print("Writing %s into nc file"%key)
         # create dimensions
         for dim in value.shape:
             dim_name = "%d"%dim
@@ -563,8 +567,10 @@ class RecGrid(Grid):
 
     def _cal_grid_parameters_with_bsite(self, spacing, bsite_file, nc_handle):
         """
-        spacing:    float, unit in angstrom, the same in x, y, z directions
-        bsite_file: str, the file name of "measured_binding_site.py" from AlGDock pipeline
+        :param spacing: float, unit in angstrom, the same in x, y, z directions
+        :param bsite_file: str, the file name of "measured_binding_site.py" from AlGDock pipeline
+        :param nc_handle: an instance of netCDF4.Dataset()
+        :return: None
         """
         assert spacing > 0, "spacing must be positive"
         self._set_grid_key_value("origin", np.zeros([3], dtype=float))
@@ -576,7 +582,7 @@ class RecGrid(Grid):
         
         for line in open(bsite_file, "r"):
             exec(line)
-        length = 2. * half_edge_length
+        length = 2. * half_edge_length         # TODO: this is not good, half_edge_length is define in bsite_file
         count = np.ceil(length / spacing) + 1
         
         self._set_grid_key_value("counts", np.array([count]*3, dtype=int))
@@ -604,15 +610,15 @@ class RecGrid(Grid):
         dy = (self._crd[:,1] + lj_radius).max() - (self._crd[:,1] - lj_radius).min()
         dz = (self._crd[:,2] + lj_radius).max() - (self._crd[:,2] - lj_radius).min()
 
-        print "Receptor enclosing box [%f, %f, %f]"%(dx, dy, dz)
-        print "extra_buffer: %f"%extra_buffer
+        print("Receptor enclosing box [%f, %f, %f]"%(dx, dy, dz))
+        print("extra_buffer: %f"%extra_buffer)
 
         length = max([dx, dy, dz]) + 2.0*extra_buffer
         count = np.ceil(length / spacing) + 1
         
         self._set_grid_key_value("counts", np.array([count]*3, dtype=int))
-        print "counts ", self._grid["counts"]
-        print "Total box size %f" %((count-1)*spacing)
+        print("counts ", self._grid["counts"])
+        print("Total box size %f" %((count-1)*spacing))
 
         for key in ["origin", "d0", "d1", "d2", "spacing", "counts"]:
             self._write_to_nc(nc_handle, key, self._grid[key])
@@ -629,7 +635,7 @@ class RecGrid(Grid):
         grid_center = (self._origin_crd + self._uper_most_corner_crd) / 2.
         displacement = grid_center - receptor_box_center
 
-        print "Receptor is translated by ", displacement
+        print("Receptor is translated by ", displacement)
 
         for atom_ind in range(len(self._crd)):
             self._crd[atom_ind] += displacement
@@ -640,7 +646,7 @@ class RecGrid(Grid):
         calculate grid coordinates (x,y,z) for each corner,
         save 'x', 'y', 'z' to self._grid
         """
-        print "calculating grid coordinates"
+        print("calculating grid coordinates")
         #
         x = np.zeros(self._grid["counts"][0], dtype=float)
         y = np.zeros(self._grid["counts"][1], dtype=float)
@@ -682,7 +688,7 @@ class RecGrid(Grid):
         use cython to calculate each to the grids, save them to nc file
         """
         for name in self._grid_func_names:
-            print "calculating %s grid"%name
+            print("calculating %s grid"%name)
             charges = self._get_charges(name)
             grid = c_cal_potential_grid(name, self._crd, 
                                         self._grid["x"], self._grid["y"], self._grid["z"],
@@ -717,8 +723,8 @@ class RecGrid(Grid):
 
             if R > lj_diameter:
                 values["electrostatic"] +=  332.05221729 * self._prmtop["CHARGE_E_UNIT"][atom_ind] / R
-                values["LJr"]           +=  self._prmtop["R_LJ_CHARGE"][atom_ind] / R**12
-                values["LJa"]           +=  -2. * self._prmtop["A_LJ_CHARGE"][atom_ind] / R**6
+                values["LJr"] +=  self._prmtop["R_LJ_CHARGE"][atom_ind] / R**12
+                values["LJa"] += -2. * self._prmtop["A_LJ_CHARGE"][atom_ind] / R**6
         
         return values
     
@@ -755,9 +761,9 @@ class RecGrid(Grid):
     
     def direct_energy(self, ligand_coordinate, ligand_charges):
         """
-        ligand_coordinate is an array of shape (natoms, 3)
-        ligand_charges is an array of shape (3)
-        assume that ligand_coordinate is inside grid
+        :param ligand_coordinate: ndarray of shape (natoms, 3)
+        :param ligand_charges: ndarray of shape (3,)
+        :return: dic
         """
         assert len(ligand_coordinate) == len(ligand_charges["CHARGE_E_UNIT"]), "coord and charges must have the same len"
         energy = 0.
@@ -803,9 +809,9 @@ class RecGrid(Grid):
 
 if __name__ == "__main__":
     # do some test
-    rec_prmtop_file     = "../examples/amber/t4_lysozyme/receptor_579.prmtop"
-    rec_inpcrd_file     = "../examples/amber/t4_lysozyme/receptor_579.inpcrd"
-    grid_nc_file        = "../examples/grid/t4_lysozyme/grid.nc" 
+    rec_prmtop_file = "../examples/amber/t4_lysozyme/receptor_579.prmtop"
+    rec_inpcrd_file = "../examples/amber/t4_lysozyme/receptor_579.inpcrd"
+    grid_nc_file = "../examples/grid/t4_lysozyme/grid.nc"
     lj_sigma_scaling_factor = 0.8
     bsite_file = "../examples/amber/t4_lysozyme/measured_binding_site.py"
     spacing = 0.25
@@ -815,25 +821,26 @@ if __name__ == "__main__":
                         grid_nc_file,
                         new_calculation=True,
                         spacing=spacing)
-    print "get_grid_func_names", rec_grid.get_grid_func_names()
-    print "get_grids", rec_grid.get_grids()
-    print "get_crd", rec_grid.get_crd()
-    print "get_prmtop", rec_grid.get_prmtop()
-    print "get_prmtop", rec_grid.get_charges()
-    print "get_natoms", rec_grid.get_natoms()
-    print "get_natoms", rec_grid.get_allowed_keys()
+    print("get_grid_func_names", rec_grid.get_grid_func_names())
+    print("get_grids", rec_grid.get_grids())
+    print("get_crd", rec_grid.get_crd())
+    print("get_prmtop", rec_grid.get_prmtop())
+    print("get_prmtop", rec_grid.get_charges())
+    print("get_natoms", rec_grid.get_natoms())
+    print("get_natoms", rec_grid.get_allowed_keys())
+
     rec_grid.write_box("../examples/grid/t4_lysozyme/box.pdb")
     rec_grid.write_pdb("../examples/grid/t4_lysozyme/test.pdb", "w")
 
-    lig_prmtop_file     = "../examples/amber/benzene/ligand.prmtop"
-    lig_inpcrd_file     = "../examples/amber/benzene/ligand.inpcrd"
+    lig_prmtop_file = "../examples/amber/benzene/ligand.prmtop"
+    lig_inpcrd_file = "../examples/amber/benzene/ligand.inpcrd"
     lig_grid = LigGrid(lig_prmtop_file, lj_sigma_scaling_factor, lig_inpcrd_file, rec_grid)
     lig_grid.cal_grids()
-    print "get_bpmf", lig_grid.get_bpmf()
-    print "get_number_translations", lig_grid.get_number_translations()
-    print "get_box_volume", lig_grid.get_box_volume()
-    print "get_meaningful_energies", lig_grid.get_meaningful_energies()
-    print "get_meaningful_corners", lig_grid.get_meaningful_corners()
-    print "set_meaningful_energies_to_none", lig_grid.set_meaningful_energies_to_none()
-    print "get_initial_com", lig_grid.get_initial_com()
+    print("get_bpmf", lig_grid.get_bpmf())
+    print("get_number_translations", lig_grid.get_number_translations())
+    print("get_box_volume", lig_grid.get_box_volume())
+    print("get_meaningful_energies", lig_grid.get_meaningful_energies())
+    print("get_meaningful_corners", lig_grid.get_meaningful_corners())
+    print("set_meaningful_energies_to_none", lig_grid.set_meaningful_energies_to_none())
+    print("get_initial_com", lig_grid.get_initial_com())
 
