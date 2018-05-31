@@ -1,9 +1,12 @@
-"""
-"""
+
+
+from __future__ import print_function
+
 import os
 
 import numpy as np
 import netCDF4
+
 
 class PrmtopLoad(object):
     """
@@ -13,7 +16,7 @@ class PrmtopLoad(object):
     """
     def __init__(self, prmtop_file_name):
         """
-        prmtop_file_name    :   str, file name of the AMBER promtop file.
+        :param prmtop_file_name: str, file name of the AMBER promtop file.
         """
         assert os.path.exists(prmtop_file_name), "%s does not exist" %prmtop_file_name
         
@@ -218,7 +221,7 @@ class InpcrdLoad(object):
     """
     def __init__(self, inpcrd_file_name):
         """
-        inpcrd_file_name is a str
+        :param inpcrd_file_name: str, name of AMBER coordinate file
         """
         assert os.path.isfile(inpcrd_file_name), "%s does not exist" %inpcrd_file_name
         
@@ -235,7 +238,7 @@ class InpcrdLoad(object):
             self._crd = self._read_vmd_format(inpcrd_lines)
         else:
             self._crd = self._load_amber_format(inpcrd_lines)
-        print "Number of atoms in %s is %d"%(inpcrd_file_name, len(self._crd))
+        print("Number of atoms in %s is %d"%(inpcrd_file_name, len(self._crd)))
     
     def _read_vmd_format(self, inpcrd_lines):
         natoms = int(inpcrd_lines[0].split()[-2])
@@ -247,7 +250,7 @@ class InpcrdLoad(object):
             crd = crd + [float(x) for x in line.split()]
         crd = np.resize(crd,(len(crd)/3,3))
         if len(crd) > natoms:
-            print "box size information included but ignored"
+            print("box size information included but ignored")
             crd = crd[:natoms, :]
         return crd
 
@@ -262,7 +265,7 @@ class InpcrdLoad(object):
         
         crd = np.resize(crd,(len(crd)/3,3))
         if len( crd ) > natoms:
-            print "box size information included but ignored"
+            print("box size information included but ignored")
             crd = crd[:natoms, :]
         return crd
 
@@ -283,10 +286,13 @@ def load_nc(nc_file_name):
     in_nc.close()
     return data
 
-def write_nc(data, nc_file_name, exclude=[]): 
+
+def write_nc(data, nc_file_name, exclude=()):
     """
-    data is a dict
-    nc_file_name is a str
+    :param data: dic mapping str to ndarray
+    :param nc_file_name: str
+    :param exclude: tuple or list, which data keys to exclude
+    :return: nc handle
     """
     keys = [key for key in data.keys() if key not in exclude]
     out_nc = netCDF4.Dataset(nc_file_name, "w", format="NETCDF4")
@@ -314,12 +320,14 @@ def write_nc(data, nc_file_name, exclude=[]):
         out_nc.variables[key][:] = data[key]
     return out_nc
 
+
 def write_pdb(prmtop, xyz, pdb_file_name, mode):
     """
-    prmtop: str or dic returned by PrmtopLoad.get_parm_for_grid_calculation()
-    xyz is the molecular coordinate
-    pdb_file_name is a string
-    mode is a string either "w" or "a"
+    :param prmtop: str or dic returned by PrmtopLoad.get_parm_for_grid_calculation()
+    :param xyz: ndarray, the molecular coordinate
+    :param pdb_file_name: str
+    :param mode: str, either "w" or "a"
+    :return: None
     """
     assert mode in ["w", "a"], "unsupported mode"
     out_pdb = open(pdb_file_name, mode)
@@ -340,6 +348,7 @@ def write_pdb(prmtop, xyz, pdb_file_name, mode):
     out_pdb.write("TER\nENDMDL\n")
     out_pdb.close()
     return None
+
 
 def write_box( grid, pdb_file_name ):
     """
@@ -373,18 +382,18 @@ def write_box( grid, pdb_file_name ):
     out_pdb.close()
     return None
 
-#
+
 if __name__ == "__main__":
     # do some test
     prmtop_file = "../examples/amber/t4_lysozyme/receptor_579.prmtop"
     inpcrd_file = "../examples/amber/t4_lysozyme/receptor_579.inpcrd"
 
     prmtop_obj = PrmtopLoad(prmtop_file)
-    print prmtop_obj.get_all_parameters() 
-    print prmtop_obj.get_parm_for_grid_calculation()
-    print prmtop_obj.get_natoms()
+    print(prmtop_obj.get_all_parameters())
+    print(prmtop_obj.get_parm_for_grid_calculation())
+    print(prmtop_obj.get_natoms())
 
     inpcrd_obj = InpcrdLoad(inpcrd_file)
-    print inpcrd_obj.get_coordinates()
+    print(inpcrd_obj.get_coordinates())
 
 
