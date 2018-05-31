@@ -1,9 +1,9 @@
 """
 run MD, replica exchange (parallel tempering) and calcaulte energy using OpenMM
 """
+
 from sys import stdout
 
-import os
 import copy
 
 import numpy as np
@@ -23,9 +23,10 @@ openmm_solvent_models = {  "OpenMM_Gas":None,
                             "OpenMM_OBC2":simtk.openmm.app.OBC2 }
 
 
-KB = 8.3144621E-3/4.184  # kcal/mol/K
+KB = 0.001987204134799235  # kcal/mol/K
 
-class OpenMM_MD:
+
+class OpenMM_MD(object):
     def __init__(self, prmtop, inpcrd, phase="OpenMM_Gas", temperature=300.):
         """
         """
@@ -39,7 +40,7 @@ class OpenMM_MD:
         
         self._simulation = simtk.openmm.app.Simulation(self._prmtop.topology, system, integrator)
         self._simulation.context.setPositions(inpcrd.positions)
-        print "Energy minimizing"
+        print("Energy minimizing")
         self._simulation.minimizeEnergy()
 
     def _initialize_nc(self, nc_file_name, niterations):
@@ -74,13 +75,14 @@ class OpenMM_MD:
 
         return None
 
-class OpenMM_TREMD:
+
+class OpenMM_TREMD(object):
     def __init__(self, prmtop, inpcrd, phase, temperatures):
         """
-        prmtop  :   str,    file name
-        inpcrd  :   str,    file name
-        phase   :   str,    gas or solvent phases
-        temperatures    :   array-like,     list of temperatures from low to high
+        :param prmtop: str, name of AMBER prmtop file
+        :param inpcrd: str, name of AMBER coordinate file
+        :param phase: str
+        :param temperatures: list or ndarray of float
         """
         self._temperatures = list(temperatures)
         self._simulations  = self._create_simulations(prmtop, inpcrd, phase, temperatures)
@@ -115,8 +117,8 @@ class OpenMM_TREMD:
             self._exchange(self._start)
             self._switch_start()
 
-            print "iteration ", iteration
-            print "energies ", energies
+            print("iteration ", iteration)
+            print("energies ", energies)
 
         acceptance_rate = self._acepted_exchange / self._nr_attempts
         nc_handle.variables["acceptance_rate"][:] = acceptance_rate
@@ -272,8 +274,8 @@ def openmm_energy(prmtop_file, crd, phase):
         raise RuntimeError("crd_ensemble has wrong shape")
     
     prmtop = simtk.openmm.app.AmberPrmtopFile(prmtop_file)
-    system = prmtop.createSystem(nonbondedMethod=simtk.openmm.app.NoCutoff, \
-            constraints=None, implicitSolvent=selected_solvent)
+    system = prmtop.createSystem(nonbondedMethod=simtk.openmm.app.NoCutoff,
+                                 constraints=None, implicitSolvent=selected_solvent)
     dummy_integrator = simtk.openmm.VerletIntegrator(0.002*simtk.unit.picoseconds)
     simulation = simtk.openmm.app.Simulation(prmtop.topology, system, dummy_integrator)
     
