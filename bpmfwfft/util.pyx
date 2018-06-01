@@ -3,8 +3,10 @@ cimport cython
 import numpy as np
 cimport numpy as np
 
+
 cdef extern from "math.h":
     double sqrt(double)
+
 
 @cython.boundscheck(False)
 def cdistance(np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=1] y):
@@ -16,6 +18,7 @@ def cdistance(np.ndarray[np.float64_t, ndim=1] x, np.ndarray[np.float64_t, ndim=
         tmp = x[i] - y[i]
         d += tmp*tmp
     return sqrt(d)
+
 
 @cython.boundscheck(False)
 def c_get_corner_crd(np.ndarray[np.int64_t, ndim=1] corner,
@@ -30,6 +33,7 @@ def c_get_corner_crd(np.ndarray[np.int64_t, ndim=1] corner,
     crd = np.array([grid_x[i], grid_y[j], grid_z[k]] , dtype=float)
     return crd
 
+
 @cython.boundscheck(False)
 def c_is_in_grid(np.ndarray[np.float64_t, ndim=1] atom_coordinate,
                  np.ndarray[np.float64_t, ndim=1] origin_crd,
@@ -41,6 +45,7 @@ def c_is_in_grid(np.ndarray[np.float64_t, ndim=1] atom_coordinate,
         if (atom_coordinate[i] < origin_crd[i]) or (atom_coordinate[i] >= uper_most_corner_crd[i]):
             return False
     return True
+
 
 @cython.boundscheck(False)
 def c_containing_cube(  np.ndarray[np.float64_t, ndim=1] atom_coordinate,
@@ -78,6 +83,7 @@ def c_containing_cube(  np.ndarray[np.float64_t, ndim=1] atom_coordinate,
     furthest_ind  = distances.index(max(distances))
     return eight_corners, nearest_ind, furthest_ind
 
+
 @cython.boundscheck(False)
 def c_lower_corner_of_containing_cube(  np.ndarray[np.float64_t, ndim=1] atom_coordinate,
                                         np.ndarray[np.float64_t, ndim=1] origin_crd,
@@ -93,6 +99,7 @@ def c_lower_corner_of_containing_cube(  np.ndarray[np.float64_t, ndim=1] atom_co
     tmp = atom_coordinate - origin_crd
     lower_corner = np.array(tmp / spacing, dtype=int)
     return lower_corner
+
 
 @cython.boundscheck(False)
 def c_corners_within_radius(np.ndarray[np.float64_t, ndim=1] atom_coordinate,
@@ -170,6 +177,7 @@ def c_corners_within_radius(np.ndarray[np.float64_t, ndim=1] atom_coordinate,
                             corners.append(np.array([i,j,k], dtype=int))
             return corners
 
+
 @cython.boundscheck(False)
 def c_is_row_in_matrix( np.ndarray[np.int64_t, ndim=1] row, 
                         list matrix):
@@ -180,6 +188,7 @@ def c_is_row_in_matrix( np.ndarray[np.int64_t, ndim=1] row,
         if (row == r).all():
             return True
     return False
+
 
 @cython.boundscheck(False)
 def c_ten_corners(  np.ndarray[np.float64_t, ndim=1] atom_coordinate,
@@ -350,6 +359,7 @@ def c_cal_potential_grid(   str name,
             for i, j, k in corners:
                 grid[i,j,k] = 1.
     return grid
+
 
 @cython.boundscheck(False)
 def c_cal_charge_grid(  str name,
