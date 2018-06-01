@@ -1,17 +1,21 @@
 """
 python wraper of sander (AmberTools) to calculate energy 
 """
+from __future__ import print_function
+
 import os
 
 import numpy as np
 
 SANDER_PHASES = ["sander_Gas", "sander_PBSA", "sander_HCT", "sander_OBC1", "sander_OBC2", "sander_GBn", "sander_GBn2"] 
 
+
 def _sander_script_gen(phase, no_bonded):
     """
     adapted from AlGDock _sander_energy
-    phase:  str, one of SANDER_PHASES
-    return a str, which can be written to file and pass to "-i" option of sander
+    :param phase: str, one of SANDER_PHASES
+    :param no_bonded: bool
+    :return: str, which can be written to file and pass to "-i" option of sander
     """
     assert phase in SANDER_PHASES, "Phase %s is unknown"%phase 
 
@@ -59,11 +63,11 @@ def _sander_script_gen(phase, no_bonded):
         """%(igb)
     return script
 
+
 def _array_2_mdcrd(crd):
     """
-    crd:    np.ndarray, shape = (nconfs, natoms, 3)
-    unit Angstrom
-    return a str, which can be written to mdcrd file
+    :param crd: ndarray of shape (nconfs, natoms, 3)
+    :return: str, which can be written to mdcrd file
     """
     assert len(crd.shape) == 3, "crd must be of 3D"
     assert crd.shape[2] == 3, "crd last dimension must be 3"  
@@ -80,11 +84,11 @@ def _array_2_mdcrd(crd):
         out_str += "\n"
     return out_str
 
+
 def _array_2_inpcrd(crd):
     """
-    crd:    np.ndarray, shape = (natoms, 3)
-    unit Angstrom
-    return a str, which can be written to inpcrd file
+    :param crd: ndarray with shape (natoms, 3)
+    :return: str, which can be written to inpcrd file
     """
     assert len(crd.shape) == 2, "crd must be of 2D"
     assert crd.shape[1] == 3, "crd last dimension must be 3"
@@ -97,6 +101,7 @@ def _array_2_inpcrd(crd):
         if (i+1)%2 == 0:
             out_str += """\n"""
     return out_str
+
 
 def _extract_component_energies(file):
     exclude_terms = ["VDWAALS", "1-4VDW", "EEL", "1-4EEL"]
@@ -139,10 +144,10 @@ def sander_energy(prmtop_file, crd, phase, tmp_dir, no_bonded=True):
     sander_file_prefix = "sander_tmp_%d"%np.random.randint(0,10000)
 
     SANDER_SCRIPT = os.path.join(tmp_dir, sander_file_prefix+".inp")
-    INPCRD        = os.path.join(tmp_dir, sander_file_prefix+".inpcrd")
-    SANDER_OUT    = os.path.join(tmp_dir, sander_file_prefix+".out")
-    MDCRD_FILE    = os.path.join(tmp_dir, sander_file_prefix+".mdcrd")
-    RESTART       = os.path.join(tmp_dir, sander_file_prefix+".restrt")
+    INPCRD = os.path.join(tmp_dir, sander_file_prefix+".inpcrd")
+    SANDER_OUT = os.path.join(tmp_dir, sander_file_prefix+".out")
+    MDCRD_FILE = os.path.join(tmp_dir, sander_file_prefix+".mdcrd")
+    RESTART = os.path.join(tmp_dir, sander_file_prefix+".restrt")
 
     script_str = _sander_script_gen(phase, no_bonded)
     open(SANDER_SCRIPT, "w").write(script_str)
@@ -163,7 +168,7 @@ def sander_energy(prmtop_file, crd, phase, tmp_dir, no_bonded=True):
 
     import subprocess
     args_list = ["sander", "-O", "-i", SANDER_SCRIPT, "-o", SANDER_OUT, "-p", prmtop_file, "-c", INPCRD, "-y", MDCRD_FILE, "-r", RESTART]
-    print ' '.join(args_list)
+    print(' '.join(args_list))
     p = subprocess.Popen(args_list)
     p.wait()
 
