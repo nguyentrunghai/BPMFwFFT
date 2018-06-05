@@ -1,6 +1,7 @@
 """
 to run FFT sampling for an ensemble of ligand configurations and a rigid receptor
 """
+from __future__ import print_function
 
 import sys
 import os
@@ -34,6 +35,7 @@ parser.add_argument( "--nc_out_file",   type=str, default="fft_sample.nc")
 
 args = parser.parse_args()
 
+
 def is_sampling_done(nc_file, number_ligand_samples):
     if not os.path.exists(nc_file):
         return False
@@ -49,6 +51,7 @@ def is_sampling_done(nc_file, number_ligand_samples):
 
     return True
 
+
 if not is_sampling_done(args.nc_out_file, args.number_ligand_samples):
 
     lig_nc_handle = nc.Dataset(args.ligand_traj_nc_file, "r")
@@ -57,7 +60,7 @@ if not is_sampling_done(args.nc_out_file, args.number_ligand_samples):
                 " is less than %d"%args.number_ligand_samples )
 
     if not args.randomly_sampling_ligand:
-        ligand_samples = ig_nc_handle.variables["positions"][0 : args.number_ligand_samples]
+        ligand_samples = lig_nc_handle.variables["positions"][0 : args.number_ligand_samples]
     else:
         sel_ind = np.random.choice(lig_nc_handle.variables["positions"].shape[0], size=args.number_ligand_samples, replace=False)
         ligand_samples = lig_nc_handle.variables["positions"][sel_ind]
@@ -72,9 +75,10 @@ if not is_sampling_done(args.nc_out_file, args.number_ligand_samples):
                             args.nc_out_file,
                             temperature=300.)
     sampler.run_sampling()
-    print "Sampling Done"
+
+    print("Sampling Done")
 
 else:
-    print args.nc_out_file + " is good, nothing to be done!"
+    print(args.nc_out_file + " is good, nothing to be done!")
 
 
