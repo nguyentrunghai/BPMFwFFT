@@ -1,6 +1,7 @@
 """
 rum temperature hamiltonian replica exchange simulation
 """
+from __future__ import print_function
 
 import os
 import sys
@@ -46,11 +47,13 @@ def is_md_done(nc_file, niterations):
         return False
     return True
 
+
 def geometric_progression(low, high, n):
     assert low > 0 and high > 0, "low and high must be positive"
     assert high > low, "high must be higher than low"
     log_scale = np.linspace(np.log(low), np.log(high), n)
     return np.exp(log_scale)
+
 
 if not is_md_done(args.nc_traj_file, args.niterations):
     temperatures = geometric_progression(args.low_temperature, args.high_temperature, args.ntemperatures)
@@ -59,5 +62,5 @@ if not is_md_done(args.nc_traj_file, args.niterations):
     tremd.run(args.nc_traj_file, args.steps_per_iteration, args.niterations, args.rotations_per_iteration)
 
 else:
-    print args.nc_traj_file + " is good, so nothing to be done!"
+    print(args.nc_traj_file + " is good, so nothing to be done!")
 
