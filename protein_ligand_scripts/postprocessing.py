@@ -2,6 +2,7 @@
 run postprocessing FFT sampling data in implicit solvent models 
 to estimate binding potential of mean force
 """
+from __future__ import print_function
 
 import sys
 import argparse
