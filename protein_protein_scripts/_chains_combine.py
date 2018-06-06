@@ -5,25 +5,26 @@ A modelled loop will not be included if it is longer than loop_cutoff.
 If so, "TER" will be inserted to split the chain
 """
 
+from __future__ import print_function
+
 import os
 import copy
 import glob
 
 MODELLED_PDB_SUBFIX = "_modelled.pdb"
-MODELLED_RESIDUES   = "REMARK  MODELLED RESIDUES:"
+MODELLED_RESIDUES = "REMARK  MODELLED RESIDUES:"
 ATOM = "ATOM"
 HETATM = "HETATM"
 TER = "TER"
 
-class ChainCombine:
-    """
-    """
+
+class ChainCombine(object):
     def __init__(self, pdb_id, chains, modelling_dir, ions_cofactors_files):
         """
-        pdb_id: str
-        chains: list of str; e.g., ["A", "B"]
-        modelling_dir: str; the directory where modeller was done for missing residues.
-        ions_cofactors_files:   list of str
+        :param pdb_id: str
+        :param chains: list of str; e.g., ["A", "B"]
+        :param modelling_dir: str; the directory where modeller was done for missing residues.
+        :param ions_cofactors_files: list of str
         """
         self._pdb_id = pdb_id
         self._chains = chains
@@ -56,8 +57,8 @@ class ChainCombine:
             residues_to_minimize.extend([ r+shift for r in self._trimed_pdb_data[chain]["residues_to_minimize"] ])
             shift += len(self._trimed_pdb_data[chain]["residues"])
 
-        self._combined_pdb_data = {"atoms":copy.deepcopy(atoms), "residues_to_minimize":residues_to_minimize,
-                "nresidues":shift}
+        self._combined_pdb_data = {"atoms":copy.deepcopy(atoms),
+                                   "residues_to_minimize":residues_to_minimize, "nresidues":shift}
         self._combined_pdb_data["atoms"] = self._change_resid_sequentially()
         self._combined_pdb_data["natoms"] = self._count_atoms(self._combined_pdb_data["atoms"])
 
@@ -118,13 +119,12 @@ class ChainCombine:
 
     def _load_chain(self, pdb_id, chain, modelling_dir):
         """
-        pdb_id: str
-        chain:  one-letter str
-        modelling_dir:  str, path to modeller results for pdb_id
-        return a dic with keys: "modelled_residues" -> dict {"nter" : [], "loops" : [], "cter" : []}
+        :param pdb_id: str
+        :param chain: one-letter str
+        :param modelling_dir: str, path to modeller results for pdb_id
+        :return: dict with keys: "modelled_residues" -> dict {"nter" : [], "loops" : [], "cter" : []}
                                 "atoms" -> list of ATOM lines
                                 "residues" -> list of residue id
-
         """
         assert len(chain) == 1, "chain must be a single letter"
         infile = os.path.join(modelling_dir, pdb_id + chain + MODELLED_PDB_SUBFIX)
@@ -189,8 +189,10 @@ class ChainCombine:
 
     def _trim_atoms(self, modelled_residues, atoms, residue_list):
         """
-        modelled_residues:  dic with keys "nter", "cter", "loops" and "missing_loops"
-        atoms:              list of ATOM lines in pdb
+        :param modelled_residues: dic with keys "nter", "cter", "loops" and "missing_loops"
+        :param atoms: list of ATOM lines in pdb
+        :param residue_list: list of str
+        :return:
         """
         missing_res = []
         for missing in modelled_residues["missing_loops"]:
@@ -276,8 +278,8 @@ class ChainCombine:
     
     def _load_ions_cofactors(self, ions_cofactors_files):
         """
-        ions_cofactors_pdb_dir: list of str
-        return None if ions_cofactors_files is empty
+        :param ions_cofactors_files: list of str
+        :return: None if ions_cofactors_files is empty
         """
         if len(ions_cofactors_files) == 0:
             return None
@@ -308,8 +310,9 @@ class ChainCombine:
 
 def parse_modelling_dir(complex_id, modeller_dir):
     """
-    complex_id: tuple of (pdb_id, chains1, chains2)
-    modeller_dir:   str
+    :param complex_id: tuple of (pdb_id, chains1, chains2)
+    :param modeller_dir: str
+    :return:
     """
     pdb_id, chains1, chains2 = complex_id
     modelling_dir = os.path.join(modeller_dir, pdb_id)
@@ -325,7 +328,7 @@ def parse_modelling_dir(complex_id, modeller_dir):
     mod_chains1 = False
     for c in chains1:
         if c not in all_chains:
-            print "chain %s does not exist in %s"%(c, pdb_id)
+            print("chain %s does not exist in %s"%(c, pdb_id))
             mod_chains1 = True
     if mod_chains1:
         chains1 = [c for c in chains1 if c in all_chains]
@@ -333,14 +336,14 @@ def parse_modelling_dir(complex_id, modeller_dir):
     mod_chains2 = False
     for c in chains2:
         if c not in all_chains:
-            print "chain %s does not exist in %s"%(c, pdb_id)
+            print("chain %s does not exist in %s"%(c, pdb_id))
             mod_chains2 = True
     if mod_chains2:
         chains2 = [c for c in chains2 if c in all_chains]
 
     return pdb_id, chains1, chains2, modelling_dir
 
-LIGAND_OUT   = "ligand_modelled.pdb"
+LIGAND_OUT = "ligand_modelled.pdb"
 RECEPTOR_OUT = "receptor_modelled.pdb"
 
 LIGAND_RES_MINIMIZE = "ligand_minimize_list.dat"
@@ -350,9 +353,9 @@ def write_b_receptor_ligand_pdbs(complexes, modeller_dir, ions_cofactors_dir, te
     """
     complexes:  dict returned by _affinity_data.AffinityData.get_bound_complexes
     """
-    print "Combinning chains to form ligands and receptors for ..."
+    print("Combinning chains to form ligands and receptors for ...")
     for name, complex_id in complexes.items():
-        print name
+        print(name)
         if not os.path.isdir(name):
             os.makedirs(name)
         pdb_id, chains1, chains2, modelling_dir = parse_modelling_dir(complex_id, modeller_dir)
@@ -374,7 +377,7 @@ def write_b_receptor_ligand_pdbs(complexes, modeller_dir, ions_cofactors_dir, te
         partners[1].write_pdb(out = os.path.join(name, RECEPTOR_OUT))
         partners[1].write_residues_to_minimize(os.path.join(name, RECEPTOR_RES_MINIMIZE))
 
-    print "Done combinning chains"
-    print ""
+    print("Done combinning chains")
+    print("")
     return None
 
