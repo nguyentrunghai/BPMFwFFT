@@ -8,14 +8,15 @@ import csv
 import numpy as np
 import pandas as pd
 
-class AffinityData:
+
+class AffinityData(object):
     """
     load the affinity data files
     give interface to access the data
     """
     def __init__(self, affinity_data_files):
         """
-        affinity_data_files is a list of str
+        :param affinity_data_files: list of str
         """
         self._data_frame = self._load_tsvfiles(affinity_data_files)
 
