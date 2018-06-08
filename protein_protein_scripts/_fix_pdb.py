@@ -3,33 +3,27 @@
 define class to handle pdb files
 """
 
-import urllib
-import os
-
 import modeller
 import modeller.automodel
 import  Bio.SeqIO
 
 from _modeller_model import run_modeller
 
-class AddMissing:
-    """
-    This class loads a pdb file and prodive methods for
-    rechieving information contained in the pdb.
-    """
+
+class AddMissing(object):
     def __init__(self, pdb_file):
         """
-        pdb_file is a str
+        :param pdb_file: str
         """
         self._file = pdb_file
         self._check_pdb()
-        self._id   = pdb_file[:-4]
+        self._id = pdb_file[:-4]
         self._text_lines = open(pdb_file, "r").readlines()
 
         self._structureX_seq_header = self._structureX_seq_from_modeller()
-        self._full_sequences        = self._full_seq_from_Bio()
-        self._chains_list           = self._get_list_of_chains()
-        self._residue_ranges        = self._search_res_ranges()
+        self._full_sequences = self._full_seq_from_Bio()
+        self._chains_list = self._get_list_of_chains()
+        self._residue_ranges = self._search_res_ranges()
 
     def write_dummy_alignments(self):
         """
@@ -65,8 +59,6 @@ class AddMissing:
         return None
 
     def do_auto_modeller(self):
-        """
-        """
         for chain in self._chains_list:
             run_modeller(self._id, chain, self._missing_res_ranges[chain], 
                     self._seq_lengths[chain], self._alignment_files[chain] )
