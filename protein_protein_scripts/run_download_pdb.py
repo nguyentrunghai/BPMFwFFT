@@ -1,10 +1,14 @@
 """
 run this script to download all pdb listed in the affinity benchmark set
 """
+
+from __future__ import print_function
+
+import urllib
 import argparse
 import os
 
-from _affinity_data import affinity_data
+from _affinity_data import AffinityData
 
 PDB_URL = "http://www.rcsb.org/pdb/files"
 NOT_AVAIL_MESSAGE = "the requested file is not available"
@@ -31,12 +35,12 @@ args = parser.parse_args()
 
 affinity_data_files = [os.path.join(args.affinity_data_dir, file) for file in AFFINITY_DATA_FILES]
 
-aff_data = affinity_data(affinity_data_files)
+aff_data = AffinityData(affinity_data_files)
 pdb_ids = aff_data.unique_pdb_ids()
 
 for id in pdb_ids:
-    print "downloading " + id
+    print("downloading " + id)
     download_coord(id)
 
-print "%d files downloaded"%len(pdb_ids)
-rint "Done"
+print("%d files downloaded"%len(pdb_ids))
+print("Done")
