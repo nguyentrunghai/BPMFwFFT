@@ -1,5 +1,7 @@
 """
 """
+from __future__ import print_function
+
 import os
 
 import numpy as np
@@ -8,9 +10,21 @@ import simtk.openmm.app
 import simtk.unit
 import mdtraj
 
+REC_MIN_LIST = "receptor_minimize_list.dat"
+LIG_MIN_LIST = "ligand_minimize_list.dat"
+
+COMPLEX_INPCRD = "complex.inpcrd"
+COMPLEX_PRMTOP = "complex.prmtop"
+
+REC_INPCRD = "receptor.inpcrd"
+LIG_INPCRD = "ligand.inpcrd"
+
+
 def _read_res_to_minimize(file):
     """
     read which residue to minimize
+    :param file: str
+    :return:
     """
     residues_min = []
     with open(file, "r") as F:
@@ -21,9 +35,13 @@ def _read_res_to_minimize(file):
                 residues_min.append(int(line))
     return residues_min, nresidues
 
+
 def _combine_res_to_minimize_rec_lig(rec_res_to_minimize, lig_res_to_minimize):
     """
     combine residues to minimize in both receptor and ligand
+    :param rec_res_to_minimize:
+    :param lig_res_to_minimize:
+    :return:
     """
     rec_residues_min, rec_nresidues = _read_res_to_minimize(rec_res_to_minimize)
 
@@ -35,21 +53,17 @@ def _combine_res_to_minimize_rec_lig(rec_res_to_minimize, lig_res_to_minimize):
     return all_res_to_minimize
 
 
-REC_MIN_LIST = "receptor_minimize_list.dat"
-LIG_MIN_LIST = "ligand_minimize_list.dat"
-
-COMPLEX_INPCRD = "complex.inpcrd"
-COMPLEX_PRMTOP = "complex.prmtop"
-
-REC_INPCRD = "receptor.inpcrd"
-LIG_INPCRD = "ligand.inpcrd"
-
 def openMM_minimize(in_dir, out_dir, out_pdb="min.pdb", minimize_all=False):
     """
     if minimize_all, the whole complex will be minimize
     res_to_minimize:    list of residue indices (starting 1) allowed to move
-    """
 
+    :param in_dir:
+    :param out_dir:
+    :param out_pdb:
+    :param minimize_all:
+    :return:
+    """
     rec_res_to_minimize = os.path.join(in_dir, REC_MIN_LIST)
     lig_res_to_minimize = os.path.join(in_dir, LIG_MIN_LIST)
     res_to_minimize = _combine_res_to_minimize_rec_lig(rec_res_to_minimize, lig_res_to_minimize)
@@ -72,17 +86,17 @@ def openMM_minimize(in_dir, out_dir, out_pdb="min.pdb", minimize_all=False):
 
     state = simulation.context.getState(getEnergy=True)
     energy = state.getPotentialEnergy()
-    print "Energy before loop minimization ", energy.value_in_unit(simtk.unit.kilocalorie_per_mole)
+    print("Energy before loop minimization ", energy.value_in_unit(simtk.unit.kilocalorie_per_mole))
 
-    print "Loop minimizing ..."
+    print("Loop minimizing ...")
     simulation.minimizeEnergy()
 
     state = simulation.context.getState(getEnergy=True, getPositions=True)
     energy = state.getPotentialEnergy()
-    print "Energy after loop minimization ", energy.value_in_unit(simtk.unit.kilocalorie_per_mole)
+    print("Energy after loop minimization ", energy.value_in_unit(simtk.unit.kilocalorie_per_mole))
 
     #----
-    print "Whole minimizing ..."
+    print("Whole minimizing ...")
     positions = state.getPositions()
     prmtop = simtk.openmm.app.AmberPrmtopFile( os.path.join(in_dir, COMPLEX_PRMTOP) )
     system = prmtop.createSystem(nonbondedMethod = simtk.openmm.app.NoCutoff,
@@ -94,7 +108,7 @@ def openMM_minimize(in_dir, out_dir, out_pdb="min.pdb", minimize_all=False):
 
     state = simulation.context.getState(getEnergy=True, getPositions=True)
     energy = state.getPotentialEnergy()
-    print "Energy after whole minimization ", energy.value_in_unit(simtk.unit.kilocalorie_per_mole)
+    print("Energy after whole minimization ", energy.value_in_unit(simtk.unit.kilocalorie_per_mole))
 
     positions = state.getPositions()
     crd = np.array( positions.value_in_unit(simtk.unit.angstrom), dtype=float )
@@ -109,14 +123,16 @@ def openMM_minimize(in_dir, out_dir, out_pdb="min.pdb", minimize_all=False):
     _write_inpcrd(rec_crd, os.path.join(out_dir, REC_INPCRD))
     _write_inpcrd(lig_crd, os.path.join(out_dir, LIG_INPCRD))
 
-    print "Minimizing done!"
+    print("Minimizing done!")
     return None
+
 
 def _read_natoms(inpcrd):
     with open(inpcrd, "r") as F:
         F.readline()
         natoms = int(F.readline())
     return natoms
+
 
 def _write_inpcrd(crd, file):
     out_str = """default_name\n"""
