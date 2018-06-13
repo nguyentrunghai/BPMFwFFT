@@ -8,14 +8,22 @@ from modeller.automodel import automodel
 from modeller.automodel import loopmodel
 from modeller.automodel import refine
 
+
 class ModellingError(Exception):
     def __init__(self, value):
         self.value = value
     def __str__(self):
         return repr(self.value)
 
+
 def run_modeller(id, chain, missing_res_ranges, sequence_len, align_file):
     """
+    :param id:
+    :param chain:
+    :param missing_res_ranges:
+    :param sequence_len:
+    :param align_file:
+    :return:
     """
     env = environ()
     env.io.atom_files_directory = ['.']
@@ -29,9 +37,13 @@ def run_modeller(id, chain, missing_res_ranges, sequence_len, align_file):
     _copy_result(id, chain, missing_res_ranges)
     return None
 
+
 def _redefine_loopmodel_string(missing_res_ranges, sequence_len):
     """
     retrun a str to be run by exec to modyfy the class loopmodel.
+    :param missing_res_ranges:
+    :param sequence_len:
+    :return:
     """
     out_string = """class MyModel(automodel):\n\tdef select_atoms(self):\n\t\treturn selection( """
 
@@ -44,8 +56,13 @@ def _redefine_loopmodel_string(missing_res_ranges, sequence_len):
 
     return out_string
 
+
 def _copy_result(id, chain, missing_res_ranges):
-    """ 
+    """
+    :param id:
+    :param chain:
+    :param missing_res_ranges:
+    :return:
     """
     missing_res_ranges = [(star+1, end+1) for star, end in missing_res_ranges]
     output_pdbs = glob.glob(id+chain+"_full.B*.pdb")
