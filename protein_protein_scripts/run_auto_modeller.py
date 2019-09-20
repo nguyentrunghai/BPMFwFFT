@@ -1,4 +1,5 @@
 """
+run modeller to add missing residues
 """
 import os
 import sys
@@ -9,9 +10,9 @@ import argparse
 from _fix_pdb import AddMissing
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "--pdb_dir",     type=str, default = "pdbs" )
-parser.add_argument( "--pdb",     type=str, default = "xxx.pdb" )
-parser.add_argument( "--submit",   action="store_true", default=False )
+parser.add_argument("--pdb_dir", type=str, default="pdbs")
+parser.add_argument("--pdb", type=str, default="xxx.pdb")
+parser.add_argument("--submit", action="store_true", default=False)
 
 args = parser.parse_args()
 
