@@ -21,7 +21,7 @@ parser.add_argument("--lig_ensemble_dir",              type=str, default="rotati
 
 parser.add_argument("--energy_sample_size_per_ligand", type=int, default=1000)
 parser.add_argument("--nr_lig_conf",                   type=int, default=500)
-parser.add_argument("--start_index",                    type=int, default=1)
+parser.add_argument("--start_index",                    type=int, default=0)
 
 parser.add_argument("--out_dir",                       type=str, default="out")
 
