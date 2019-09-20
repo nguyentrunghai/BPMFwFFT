@@ -1,20 +1,25 @@
 """
+functions that perform grid calculation
 """
+
+from __future__ import print_function
+
 import sys
 import os
 import numpy as np
 import netCDF4
 
-sys.path.append("/home/tnguye46/opt/src/Bpmf_with_FFT")
+sys.path.append("/home/tnguye46/opt/src/BPMFwFFT/bpmfwfft")
 from IO import InpcrdLoad
-from RecGrid import RecGrid
-from Grid import Grid
+from grids import Grid, RecGrid
+
 
 def _distance(coord1, coord2):
     assert len(coord1)==len(coord1)==3, "coord must have len 3"
     d = np.array(coord1) - np.array(coord2)
     d = (d**2).sum()
     return np.sqrt(d)
+
 
 def _max_inter_atom_distance(inpcrd):
     """
@@ -29,6 +34,7 @@ def _max_inter_atom_distance(inpcrd):
                 max_d = d
     return max_d
 
+
 def _max_box_edge(inpcrd):
     """
     """
@@ -37,6 +43,7 @@ def _max_box_edge(inpcrd):
     dy = crd[:,1].max() - crd[:,1].min()
     dz = crd[:,2].max() - crd[:,2].min()
     return max([dx, dy, dz])
+
 
 def rec_grid_cal(prmtop, lj_scale, rec_inpcrd, lig_inpcrd, 
                 spacing, buffer, grid_out, pdb_out, box_out):
@@ -55,12 +62,12 @@ def rec_grid_cal(prmtop, lj_scale, rec_inpcrd, lig_inpcrd,
     #print "Ligand maximum inter-atomic distance: %f"%ligand_max_size
 
     ligand_max_box_edge = _max_box_edge(lig_inpcrd)
-    print "Ligand maximum box edge: %f"%ligand_max_box_edge
+    print("Ligand maximum box edge: %f"%ligand_max_box_edge)
     total_buffer = np.ceil(ligand_max_box_edge + buffer)
-    print "Total buffer for receptor gird: %f"%total_buffer
+    print("Total buffer for receptor gird: %f"%total_buffer)
 
     bsite_file = None
-    potential_grid = RecGrid( prmtop, lj_scale, 
+    potential_grid = RecGrid(prmtop, lj_scale,
                                 rec_inpcrd, 
                                 bsite_file,
                                 grid_out,
@@ -71,6 +78,7 @@ def rec_grid_cal(prmtop, lj_scale, rec_inpcrd, lig_inpcrd,
     potential_grid.write_box(box_out)
 
     return None
+
 
 def is_nc_grid_good(nc_grid_file):
     if not os.path.exists(nc_grid_file):
@@ -86,6 +94,7 @@ def is_nc_grid_good(nc_grid_file):
         if key not in nc_keys:
             return False
     return True
+
 
 def get_grid_size_from_nc(grid_nc_file):
     nc_handle = netCDF4.Dataset(grid_nc_file, "r")
