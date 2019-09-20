@@ -8,19 +8,20 @@ import argparse
 from _fft_sampling import is_sampling_nc_good, parse_nr_ligand_confs 
 from _postprocess import post_process
 
+
 parser = argparse.ArgumentParser()
-parser.add_argument( "--amber_dir",             type=str, default = "amber" )
-parser.add_argument( "--sampling_dir",             type=str, default = "fft_sampling" )
+parser.add_argument("--amber_dir", type=str, default="amber")
+parser.add_argument("--sampling_dir", type=str, default="fft_sampling")
 
-parser.add_argument( "--nr_resample",           type=int, default = 100)
+parser.add_argument("--nr_resample", type=int, default=100)
 
-parser.add_argument( "--out_dir",               type=str, default = "out" )
-parser.add_argument( "--submit",   action="store_true", default=False )
+parser.add_argument("--out_dir", type=str, default="out")
+parser.add_argument("--submit", action="store_true", default=False)
 args = parser.parse_args()
 
 RECEPTOR_PRMTOP = "receptor.prmtop"
-LIGAND_PRMTOP   = "ligand.prmtop"
-COMPLEX_PRMTOP   = "complex.prmtop"
+LIGAND_PRMTOP = "ligand.prmtop"
+COMPLEX_PRMTOP = "complex.prmtop"
 
 FFT_SAMPLING_NC = "fft_sample.nc"
 
@@ -28,10 +29,11 @@ REC_PDB_OUT = "receptor_trans.pdb"
 LIG_PDB_OUT = "ligand_resampled.pdb"
 BPMF_OUT = "bpmf.pkl"
 
+
 def is_sampling_good(sampling_dir):
-    complex = sampling_dir.split("/")[-1]
-    id = complex[:4].lower()
-    submit_file = id + "_fft.job"
+    complex_name = sampling_dir.split("/")[-1]
+    idx = complex_name[:4].lower()
+    submit_file = idx + "_fft.job"
     nr_lig_confs =  parse_nr_ligand_confs(os.path.join(sampling_dir, submit_file))
     if nr_lig_confs is None:
         return False
