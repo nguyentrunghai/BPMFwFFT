@@ -62,9 +62,9 @@ def rec_grid_cal(prmtop, lj_scale, rec_inpcrd, lig_inpcrd,
     #print "Ligand maximum inter-atomic distance: %f"%ligand_max_size
 
     ligand_max_box_edge = _max_box_edge(lig_inpcrd)
-    print("Ligand maximum box edge: %f"%ligand_max_box_edge)
+    print("Ligand maximum box edge: %f" % ligand_max_box_edge)
     total_buffer = np.ceil(ligand_max_box_edge + buffer)
-    print("Total buffer for receptor gird: %f"%total_buffer)
+    print("Total buffer for receptor gird: %f" % total_buffer)
 
     bsite_file = None
     potential_grid = RecGrid(prmtop, lj_scale,
@@ -72,7 +72,7 @@ def rec_grid_cal(prmtop, lj_scale, rec_inpcrd, lig_inpcrd,
                                 bsite_file,
                                 grid_out,
                                 new_calculation=True, 
-                                spacing=spacing, buffer=total_buffer)
+                                spacing=spacing, extra_buffer=total_buffer)
 
     potential_grid.write_pdb(pdb_out, "w")
     potential_grid.write_box(box_out)
