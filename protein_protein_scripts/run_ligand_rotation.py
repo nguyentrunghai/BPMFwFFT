@@ -7,22 +7,22 @@ import glob
 import argparse
 
 from _loop_energy_minimize import _read_natoms
-sys.path.append("/home/tnguye46/opt/src/Bpmf_with_FFT")
-from Rotation import random_gen_rotation, systematic_gen_rotation
+sys.path.append("../bpmfwfft")
+from rotation import random_gen_rotation, systematic_gen_rotation
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "--coord_dir",  type=str, default = "min" )
-parser.add_argument( "--inpcrd",     type=str, default = "ligand.inpcrd" )
-parser.add_argument( "--nc",         type=str, default = "rotation.nc" )
-parser.add_argument( "--type",       type=str, default = "random" )
-parser.add_argument( "--count",      type=int, default = 2000 )
+parser.add_argument("--coord_dir",  type=str, default="min")
+parser.add_argument("--inpcrd",     type=str, default="ligand.inpcrd")
+parser.add_argument("--nc",         type=str, default="rotation.nc")
+parser.add_argument("--type",       type=str, default="random")
+parser.add_argument("--count",      type=int, default=2000)
 
-parser.add_argument( "--submit",   action="store_true", default=False )
+parser.add_argument("--submit",   action="store_true", default=False)
 
 args = parser.parse_args()
 
-LIGAND_INPCRD   = "ligand.inpcrd"
-OUTPUT_NC       = "rotation.nc"
+LIGAND_INPCRD = "ligand.inpcrd"
+OUTPUT_NC = "rotation.nc"
 RAMDOM = "random"
 SYSTEMATIC = "systematic"
 
@@ -31,8 +31,8 @@ if args.submit:
     coord_dir = os.path.abspath(args.coord_dir)
 
     coord_sub_dirs = glob.glob(os.path.join(coord_dir, "*"))
-    coord_sub_dirs = [dir for dir in coord_sub_dirs if os.path.isdir(dir)]
-    complex_names = [os.path.basename(dir) for dir in coord_sub_dirs]
+    coord_sub_dirs = [d for d in coord_sub_dirs if os.path.isdir(d)]
+    complex_names = [os.path.basename(d) for d in coord_sub_dirs]
 
     natoms = {}
     for complex in complex_names:
@@ -69,10 +69,10 @@ python ''' + this_script + \
         ''' --nc ''' + output_nc + "\n"
         open( qsub_file, "w" ).write( qsub_script )
         if (not os.path.exists(output_nc)) or (os.path.getsize(output_nc) == 0):
-            print "Submitting %s"%complex
+            print("Submitting %s"%complex)
             os.system("qsub %s" %qsub_file)
         else:
-            print "Calculation for %s is done"%complex
+            print("Calculation for %s is done"%complex)
 else:
     if args.type == RAMDOM:
         random_gen_rotation(args.inpcrd, args.count, args.nc)
