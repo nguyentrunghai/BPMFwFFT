@@ -13,6 +13,9 @@ parser.add_argument("--affinity_dir", type=str, default="affinity")
 
 # this contains files downloaded from pdb, not modelled by modeller
 parser.add_argument("--pdb_dir", type=str, default="download_pdb")
+
+parser.add_argument("--include_all", action="store_true", default=False)
+
 args = parser.parse_args()
 
 AFFINITY_DATA_FILES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
@@ -25,8 +28,6 @@ ATOM_NAME_POS = (12, 17)
 
 ACCEPTED_IONS = ["MG", "CA", "FE", "ZN", "SR"]
 ACCEPTED_COFACTORS = ["ADP", "ATP", "GDP", "GTP"]
-
-INCLUDE_ALL = False
 
 
 def _extract_ions_cofactors_from_pdb(pdb_file, chains, ions_cofactors, out_dir):
@@ -146,7 +147,7 @@ def extract_ions_cofactors_from_database(acepted_ions, acepted_cofactors,
 
 
 ions_cofactors = extract_ions_cofactors_from_database(ACCEPTED_IONS, ACCEPTED_COFACTORS,
-                                                        args.pdb_dir, include_all=INCLUDE_ALL)
+                                                        args.pdb_dir, include_all=args.include_all)
 for complex in ions_cofactors:
     print(complex, ions_cofactors[complex])
     pdb_id = complex[:4].lower()
