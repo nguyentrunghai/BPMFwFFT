@@ -5,7 +5,7 @@ define class to handle pdb files
 
 import modeller
 import modeller.automodel
-import  Bio.SeqIO
+import Bio.SeqIO
 
 from _modeller_model import run_modeller
 
