@@ -1,5 +1,8 @@
 """
+collect BPMF data
 """
+from __future__ import print_function
+
 import os
 import glob
 import argparse
@@ -9,16 +12,16 @@ from _affinity_data import AffinityData
 from _plots import scater_plot, plot_histogram
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "--postprocess_dir", type=str, default = "postprocess" )
+parser.add_argument("--postprocess_dir", type=str, default="postprocess")
+parser.add_argument("--affinity_data_dir", type=str, default="affinity")
 args = parser.parse_args()
 
 BPMF_PKL = "bpmf.pkl"
 
-AFFINITY_DATA_FILES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
-AFFINITY_DATA_DIR   = "/home/tnguye46/protein_binding/data_prep/affinity"
-AFFINITY_DATA_FILES = [ os.path.join(AFFINITY_DATA_DIR, file) for file in AFFINITY_DATA_FILES ]
+AFFINITY_FILE_NAMES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
+affinity_data_files = [os.path.join(args.affinity_data_dir, file) for file in AFFINITY_FILE_NAMES]
 
-experimental_dG = AffinityData(AFFINITY_DATA_FILES).get_dG()
+experimental_dG = AffinityData(affinity_data_files).get_dG()
 
 bpmf_files = glob.glob(os.path.join(args.postprocess_dir, "*", BPMF_PKL))
 quantities_to_output = ["bpmf", "mean_Psi", "min_Psi"]
