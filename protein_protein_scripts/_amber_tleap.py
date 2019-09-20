@@ -1,20 +1,25 @@
 """
+functions to generate AMBER topology and coordinates files
 """
+
+from __future__ import print_function
+
 import os
 import glob
+
 
 def _parse_cofactors_prep_dir(dir):
     """
     return a dic [cofactor name "ATP"] -> (prep_file, frcmod_file)
     """
-    prep_files   = glob.glob(os.path.join(dir, "*.prep"))
-    prep_files   = [os.path.abspath(file) for file in prep_files]
+    prep_files = glob.glob(os.path.join(dir, "*.prep"))
+    prep_files = [os.path.abspath(file) for file in prep_files]
 
     frcmod_files = glob.glob(os.path.join(dir, "*.frcmod")) 
     frcmod_files = [os.path.abspath(file) for file in frcmod_files]
 
     cofactor_names = [os.path.basename(file)[:-5] for file in prep_files]
-    print cofactor_names
+    print(cofactor_names)
 
     cofactors_prep = {}
     for name in cofactor_names:
@@ -27,6 +32,7 @@ def _parse_cofactors_prep_dir(dir):
                 frcmod_file = file
         cofactors_prep[name] = (prep_file, frcmod_file)
     return cofactors_prep
+
 
 def _parse_cofactors_in_pdb(pdb_file, allowed_cofactor_names):
     """
@@ -42,6 +48,7 @@ def _parse_cofactors_in_pdb(pdb_file, allowed_cofactor_names):
                 if resname in allowed_cofactor_names:
                     cofactor_names.append(resname)
     return list(set(cofactor_names))
+
 
 def _write_tleap_script(ligand_pdb, receptor_pdb, cofactors_prep, out_dir, 
         ligand_prefix, receptor_prefix, complex_prefix, tleap_script):
@@ -74,7 +81,7 @@ def _write_tleap_script(ligand_pdb, receptor_pdb, cofactors_prep, out_dir,
 
     lig_prmtop = ligand_prefix + ".prmtop"
     lig_inpcrd = ligand_prefix + ".inpcrd"
-    lig_pdb    = ligand_prefix + ".pdb"
+    lig_pdb = ligand_prefix + ".pdb"
     script += "saveAmberParm ligand %s %s\n"%(lig_prmtop, lig_inpcrd)
     script += "savepdb ligand %s\n\n"%lig_pdb
 
@@ -88,7 +95,7 @@ def _write_tleap_script(ligand_pdb, receptor_pdb, cofactors_prep, out_dir,
 
     comp_prmtop = complex_prefix + ".prmtop"
     comp_inpcrd = complex_prefix + ".inpcrd"
-    comp_pdb    = complex_prefix + ".pdb"
+    comp_pdb = complex_prefix + ".pdb"
     script += "saveAmberParm complex %s %s\n"%(comp_prmtop, comp_inpcrd)
     script += "savepdb complex %s\n\n"%comp_pdb
 
@@ -98,11 +105,14 @@ def _write_tleap_script(ligand_pdb, receptor_pdb, cofactors_prep, out_dir,
     open(script_file, "w").write(script)
     return None
 
+
 TLEAP_FAILED = "TLEAP_FAILED"
+
+
 
 def _run_tleap(tleap_script_file):
     if not os.path.isfile(tleap_script_file):
-        raise RuntimeError("%s does not exist"%tleap_script_file)
+        raise RuntimeError("%s does not exist" % tleap_script_file)
 
     tleap_script = os.path.abspath(tleap_script_file)
     cwd = os.getcwd()
@@ -110,7 +120,7 @@ def _run_tleap(tleap_script_file):
     script_name = os.path.basename(tleap_script)
 
     os.chdir(run_dir)
-    os.system("tleap -f %s"%script_name)
+    os.system("tleap -f %s" % script_name)
 
     # check results
 
@@ -129,6 +139,7 @@ def _run_tleap(tleap_script_file):
     os.chdir(cwd)
     return None
 
+
 LIGAND_PDB_INP   = "ligand_modelled.pdb"
 RECEPTOR_PDB_INP = "receptor_modelled.pdb"
 
@@ -141,17 +152,18 @@ COFACTORS_PREP_DIR = "/home/tnguye46/protein_binding/data_prep/cofactors_prep"
 
 COFACTORS_PREP = _parse_cofactors_prep_dir(COFACTORS_PREP_DIR)
 
+
 def generate_prmtop():
     """
     """
     complex_names = glob.glob("*")
     complex_names = [os.path.basename(dir) for dir in complex_names if os.path.isdir(dir)]
     if len(complex_names) == 0:
-        print "Do nothing!"
+        print("Do nothing!")
         return None
-    print "Generating amber top for ..."
+    print("Generating amber top for ...")
     for complex in complex_names:
-        print complex
+        print(complex)
         out_dir = os.path.abspath(complex)
         _write_tleap_script(LIGAND_PDB_INP, RECEPTOR_PDB_INP, COFACTORS_PREP, out_dir,
                 LIGAND_OUT_PREFIX, RECEPTOR_OUT_PREFIX, COMPLEX_OUT_PREFIX, TLEAP)
@@ -159,10 +171,10 @@ def generate_prmtop():
         tleap_script_file = os.path.join(out_dir, TLEAP)
         _run_tleap(tleap_script_file)
 
-    print "Done with Amber"
-    print "Checking for failed ..."
+    print("Done with Amber")
+    print("Checking for failed ...")
     for complex in complex_names:
         if os.path.exists(os.path.join(complex, TLEAP_FAILED)):
-            print complex, TLEAP_FAILED
+            print(complex, TLEAP_FAILED)
     return None
 
