@@ -83,6 +83,7 @@ python ''' + this_script + \
         bpmf_out = os.path.join(out_dir, BPMF_OUT)
         if not os.path.exists(bpmf_out):
             open(qsub_file, "w").write(qsub_script)
+            print("Submiting " + qsub_file)
             os.system("qsub %s" % qsub_file)
 else:
     rec_prmtop = os.path.join(args.amber_dir, RECEPTOR_PRMTOP)
