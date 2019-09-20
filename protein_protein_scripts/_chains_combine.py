@@ -82,7 +82,7 @@ class ChainCombine(object):
             out = self._pdb_id + "".join(self._chains) + "_modelled.pdb"
 
         with open(out, "w") as F:
-            header  = "REMARK NRESIDUES %d\n"%self._combined_pdb_data["nresidues"]
+            header = "REMARK NRESIDUES %d\n"%self._combined_pdb_data["nresidues"]
             header += "REMARK NATOMS %d\n"%self._combined_pdb_data["natoms"]
             header += "REMARK MINIMIZE THESE "
             nres_to_minimize = len(self._combined_pdb_data["residues_to_minimize"])
@@ -308,6 +308,7 @@ class ChainCombine(object):
         pdb_data["nresidues"] = len([line for line in pdb_data["atoms"] if line.startswith(TER)])
         return pdb_data
 
+
 def parse_modelling_dir(complex_id, modeller_dir):
     """
     :param complex_id: tuple of (pdb_id, chains1, chains2)
@@ -343,11 +344,13 @@ def parse_modelling_dir(complex_id, modeller_dir):
 
     return pdb_id, chains1, chains2, modelling_dir
 
+
 LIGAND_OUT = "ligand_modelled.pdb"
 RECEPTOR_OUT = "receptor_modelled.pdb"
 
 LIGAND_RES_MINIMIZE = "ligand_minimize_list.dat"
 RECEPTOR_RES_MINIMIZE = "receptor_minimize_list.dat"
+
 
 def write_b_receptor_ligand_pdbs(complexes, modeller_dir, ions_cofactors_dir, ter_cutoff=10, loop_cutoff=20):
     """
