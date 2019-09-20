@@ -1,5 +1,9 @@
 """
+run post processing
 """
+
+from __future__ import print_function
+
 import sys
 import os
 import glob
@@ -42,26 +46,26 @@ def is_sampling_good(sampling_dir):
     return is_sampling_nc_good(nc_sampling_file, nr_lig_confs)
 
 if args.submit:
-    this_script      =  os.path.abspath(sys.argv[0])
-    amber_dir        =  os.path.abspath(args.amber_dir)
-    sampling_dir     = os.path.abspath(args.sampling_dir)
+    this_script = os.path.abspath(sys.argv[0])
+    amber_dir = os.path.abspath(args.amber_dir)
+    sampling_dir = os.path.abspath(args.sampling_dir)
 
     complex_names = glob.glob(os.path.join(sampling_dir, "*"))
-    complex_names = [os.path.basename(dir) for dir in complex_names if os.path.isdir(dir)]
+    complex_names = [os.path.basename(d) for d in complex_names if os.path.isdir(d)]
     complex_names = [c for c in complex_names if is_sampling_good(os.path.join(sampling_dir, c))]
-    print complex_names
+    print(complex_names)
 
-    for complex in complex_names:
-        if not os.path.isdir(complex):
-            os.makedirs(complex)
+    for complex_name in complex_names:
+        if not os.path.isdir(complex_name):
+            os.makedirs(complex_name)
 
-        id = complex[:4].lower()
-        amber_sub_dir  = os.path.join(amber_dir, complex)
-        sampling_sub_dir = os.path.join(sampling_dir, complex)
-        out_dir = os.path.abspath(complex)
+        idx = complex_name[:4].lower()
+        amber_sub_dir = os.path.join(amber_dir, complex_name)
+        sampling_sub_dir = os.path.join(sampling_dir, complex_name)
+        out_dir = os.path.abspath(complex_name)
 
-        qsub_file = os.path.join(out_dir, id+"_post.job")
-        log_file  = os.path.join(out_dir, id+"_post.log")
+        qsub_file = os.path.join(out_dir, idx+"_post.job")
+        log_file = os.path.join(out_dir, idx+"_post.log")
         qsub_script = '''#!/bin/bash
 #PBS -S /bin/bash
 #PBS -o %s '''%log_file + '''
@@ -78,12 +82,12 @@ python ''' + this_script + \
 
         bpmf_out = os.path.join(out_dir, BPMF_OUT)
         if not os.path.exists(bpmf_out):
-            open( qsub_file, "w" ).write(qsub_script)
-            os.system("qsub %s" %qsub_file)
+            open(qsub_file, "w").write(qsub_script)
+            os.system("qsub %s" % qsub_file)
 else:
     rec_prmtop = os.path.join(args.amber_dir, RECEPTOR_PRMTOP)
-    lig_prmtop =  os.path.join(args.amber_dir, LIGAND_PRMTOP)
-    complex_prmtop =  os.path.join(args.amber_dir, COMPLEX_PRMTOP)
+    lig_prmtop = os.path.join(args.amber_dir, LIGAND_PRMTOP)
+    complex_prmtop = os.path.join(args.amber_dir, COMPLEX_PRMTOP)
 
     sampling_nc_file = os.path.join(args.sampling_dir, FFT_SAMPLING_NC)
     nr_resampled_complexes = args.nr_resample
