@@ -9,12 +9,10 @@ import argparse
 from _affinity_data import AffinityData
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--affinity_dir", type=str,
-                    default="/home/tnguye46/protein_binding/data_prep/affinity")
+parser.add_argument("--affinity_dir", type=str, default="affinity")
 
 # this contains files downloaded from pdb, not modelled by modeller
-parser.add_argument("--pdb_dir", type=str,
-                    default="/home/tnguye46/protein_binding/data_prep/coordinates/original_pdb")
+parser.add_argument("--pdb_dir", type=str, default="download_pdb")
 args = parser.parse_args()
 
 AFFINITY_DATA_FILES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
