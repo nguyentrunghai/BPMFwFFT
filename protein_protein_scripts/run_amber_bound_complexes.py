@@ -1,4 +1,5 @@
 """
+to generate AMBER topology and coordinate files for bound complexes and their binding partners
 """
 import os
 import argparse
