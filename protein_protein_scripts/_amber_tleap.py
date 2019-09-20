@@ -149,7 +149,7 @@ COMPLEX_OUT_PREFIX = "complex"
 TLEAP = "setup.tleap"
 
 
-def generate_prmtop(cofactors_prep_dir):
+def generate_prmtop(cofactors_frcmod_dir):
     """
     :param cofactors_prep_dir: str
     :return: None
@@ -157,7 +157,7 @@ def generate_prmtop(cofactors_prep_dir):
     complex_names = glob.glob("*")
     complex_names = [os.path.basename(d) for d in complex_names if os.path.isdir(d)]
 
-    cofactors_prep = _parse_cofactors_prep_dir(cofactors_prep_dir)
+    cofactors_prep = _parse_cofactors_prep_dir(cofactors_frcmod_dir)
 
     if len(complex_names) == 0:
         print("Do nothing!")
