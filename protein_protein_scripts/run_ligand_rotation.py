@@ -7,7 +7,7 @@ import glob
 import argparse
 
 from _loop_energy_minimize import _read_natoms
-sys.path.append("../bpmfwfft")
+sys.path.append("/home/tnguye46/opt/src/BPMFwFFT/bpmfwfft")
 from rotation import random_gen_rotation, systematic_gen_rotation
 
 parser = argparse.ArgumentParser()
