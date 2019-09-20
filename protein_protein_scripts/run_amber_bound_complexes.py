@@ -1,6 +1,8 @@
 """
 to generate AMBER topology and coordinate files for bound complexes and their binding partners
 """
+from __future__ import print_function
+
 import os
 import argparse
 
@@ -9,29 +11,34 @@ from _chains_combine import write_b_receptor_ligand_pdbs
 from _amber_tleap import generate_prmtop
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "--ions_cofactors_dir",     type=str, default = "ions_cofactors")
+parser.add_argument("--affinity_dir", type=str, default="affinity")
+
+parser.add_argument("--ions_cofactors_dir", type=str, default="ions_cofactors")
+
+parser.add_argument("--cofactors_frcmod_dir", type=str, default="cofactors_frcmod")
+
+parser.add_argument("--modeller_dir", type=str, default="modeller")
+
 args = parser.parse_args()
 
-AFFINITY_DATA_FILES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
-AFFINITY_DATA_DIR   = "/home/tnguye46/protein_binding/data_prep/affinity"
-AFFINITY_DATA_FILES = [ os.path.join(AFFINITY_DATA_DIR, file) for file in AFFINITY_DATA_FILES ]
+AFFINITY_FILES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
 
-MODELLER_DIR = "/home/tnguye46/protein_binding/data_prep/coordinates/modeller"
-IONS_COFACTORS_DIR = os.path.abspath(args.ions_cofactors_dir)
-TER_CUTOFF   = 5
-LOOP_CUTOFF  = 15
+affinity_data_files = [os.path.join(args.affinity_dir, file) for file in AFFINITY_FILES]
 
-if not os.path.isdir(MODELLER_DIR):
-    raise RuntimeError("% does not exist"%MODELLER_DIR)
+TER_CUTOFF = 5
+LOOP_CUTOFF = 15
 
-if not os.path.isdir(IONS_COFACTORS_DIR):
-    raise RuntimeError("% does not exist"%IONS_COFACTORS_DIR)
+if not os.path.isdir(args.modeller_dir):
+    raise RuntimeError("% does not exist" % args.modeller_dir)
 
-aff = AffinityData(AFFINITY_DATA_FILES)
+if not os.path.isdir(args.ions_cofactors_dir):
+    raise RuntimeError("% does not exist" % args.ions_cofactors_dir)
+
+aff = AffinityData(affinity_data_files)
 b_complexes = aff.get_bound_complexes()
 
-write_b_receptor_ligand_pdbs(b_complexes, MODELLER_DIR, IONS_COFACTORS_DIR, 
-                                ter_cutoff=TER_CUTOFF, loop_cutoff=LOOP_CUTOFF)
-generate_prmtop()
-print "Done"
+write_b_receptor_ligand_pdbs(b_complexes, args.modeller_dir, args.ions_cofactors_dir,
+                             ter_cutoff=TER_CUTOFF, loop_cutoff=LOOP_CUTOFF)
+generate_prmtop(args.cofactors_frcmod_dir)
+print("Done")
 
