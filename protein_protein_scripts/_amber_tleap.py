@@ -114,6 +114,7 @@ def _run_tleap(tleap_script_file):
     if not os.path.isfile(tleap_script_file):
         raise RuntimeError("%s does not exist" % tleap_script_file)
 
+    print("Running tleap for " + tleap_script_file)
     tleap_script = os.path.abspath(tleap_script_file)
     cwd = os.getcwd()
     run_dir = os.path.dirname(tleap_script)
