@@ -1,29 +1,35 @@
 """
+to extract bound ions and cofactors from pdb files
 """
+from __future__ import print_function
+
 import os
 import argparse
 
 from _affinity_data import AffinityData
 
 parser = argparse.ArgumentParser()
-parser.add_argument( "--affinity_dir", type=str, 
-                    default = "/home/tnguye46/protein_binding/data_prep/affinity")
-parser.add_argument( "--pdb_dir", type=str,
-                    default = "/home/tnguye46/protein_binding/data_prep/coordinates/original_pdb")
+parser.add_argument("--affinity_dir", type=str,
+                    default="/home/tnguye46/protein_binding/data_prep/affinity")
+
+# this contains files downloaded from pdb, not modelled by modeller
+parser.add_argument("--pdb_dir", type=str,
+                    default="/home/tnguye46/protein_binding/data_prep/coordinates/original_pdb")
 args = parser.parse_args()
 
 AFFINITY_DATA_FILES = ["affinity_v1.tsv",  "affinity_v2.tsv"]
 AFFINITY_DATA_FILES = [os.path.join(args.affinity_dir, file) for file in AFFINITY_DATA_FILES]
 
-CHAIN_POS     = (21, 22)
-RES_NAME_POS  = (17, 20)
-RES_ID_POS    = (22, 26)
+CHAIN_POS = (21, 22)
+RES_NAME_POS = (17, 20)
+RES_ID_POS = (22, 26)
 ATOM_NAME_POS = (12, 17)
 
 ACCEPTED_IONS = ["MG", "CA", "FE", "ZN", "SR"]
 ACCEPTED_COFACTORS = ["ADP", "ATP", "GDP", "GTP"]
 
 INCLUDE_ALL = False
+
 
 def _extract_ions_cofactors_from_pdb(pdb_file, chains, ions_cofactors, out_dir):
     """
@@ -37,19 +43,19 @@ def _extract_ions_cofactors_from_pdb(pdb_file, chains, ions_cofactors, out_dir):
     id = os.path.basename(pdb_file)[:-4]
     all_hetatm = [line for line in open(pdb_file, "r") if line.startswith("HETATM")]
     if len(all_hetatm) == 0:
-        print pdb_file + " does not have any HETATM"
+        print(pdb_file + " does not have any HETATM")
         return None
 
     i, j = CHAIN_POS
     all_hetatm = [line for line in all_hetatm if line[i:j] in chains]
     if len(all_hetatm) == 0:
-        print pdb_file + " does not have any HETATM with chain in ", chains
+        print(pdb_file + " does not have any HETATM with chain in ", chains)
         return None
 
     i, j = RES_NAME_POS
     all_hetatm = [line for line in all_hetatm if line[i:j].strip() in ions_cofactors]
     if len(all_hetatm) == 0:
-        print pdb_file + " does not have any HETATM with resname in ", ions_cofactors
+        print(pdb_file + " does not have any HETATM with resname in ", ions_cofactors)
         return None
 
     atom_records = {}
@@ -94,7 +100,7 @@ def extract_ions_cofactors_from_database(acepted_ions, acepted_cofactors,
     return dict  sel[complex_name] -> list of ions and cofactors' name
     """
     aff = AffinityData(AFFINITY_DATA_FILES)
-    ions_cofactors_bound   = aff.get_data_from_col("Cofactors (bound)")
+    ions_cofactors_bound = aff.get_data_from_col("Cofactors (bound)")
     ions_cofactors_binding = aff.get_data_from_col("Cofactors (binding)")
 
     acepted_residues = acepted_ions + acepted_cofactors
@@ -109,7 +115,7 @@ def extract_ions_cofactors_from_database(acepted_ions, acepted_cofactors,
                 for line in F:
                     if line.startswith("HETATM"):
                         chain = line[CHAIN_POS[0] : CHAIN_POS[1]]
-                        res   = line[RES_NAME_POS[0] : RES_NAME_POS[1]].strip()
+                        res = line[RES_NAME_POS[0] : RES_NAME_POS[1]].strip()
                         if (chain in chains) and (res in acepted_residues):
                             if complex not in sel.keys():
                                 sel[complex] = []
@@ -144,12 +150,13 @@ def extract_ions_cofactors_from_database(acepted_ions, acepted_cofactors,
 ions_cofactors = extract_ions_cofactors_from_database(ACCEPTED_IONS, ACCEPTED_COFACTORS,
                                                         args.pdb_dir, include_all=INCLUDE_ALL)
 for complex in ions_cofactors:
-    print complex, ions_cofactors[complex]
+    print(complex, ions_cofactors[complex])
     pdb_id = complex[:4].lower()
     chains = complex.split("_")[-1]
     chains = [c for c in chains if c != ":"]
-    print chains
+    print(chains)
 
     original_pdb = os.path.join(args.pdb_dir, pdb_id+".pdb")
     _extract_ions_cofactors_from_pdb(original_pdb, chains, ions_cofactors[complex], complex)
 
+print("DONE")
