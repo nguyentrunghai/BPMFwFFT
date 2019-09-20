@@ -140,41 +140,42 @@ def _run_tleap(tleap_script_file):
     return None
 
 
-LIGAND_PDB_INP   = "ligand_modelled.pdb"
+LIGAND_PDB_INP = "ligand_modelled.pdb"
 RECEPTOR_PDB_INP = "receptor_modelled.pdb"
 
-LIGAND_OUT_PREFIX   = "ligand"
+LIGAND_OUT_PREFIX = "ligand"
 RECEPTOR_OUT_PREFIX = "receptor"
-COMPLEX_OUT_PREFIX  = "complex"
-TLEAP               = "setup.tleap"
-
-COFACTORS_PREP_DIR = "/home/tnguye46/protein_binding/data_prep/cofactors_prep"
-
-COFACTORS_PREP = _parse_cofactors_prep_dir(COFACTORS_PREP_DIR)
+COMPLEX_OUT_PREFIX = "complex"
+TLEAP = "setup.tleap"
 
 
-def generate_prmtop():
+def generate_prmtop(cofactors_prep_dir):
     """
+    :param cofactors_prep_dir: str
+    :return: None
     """
     complex_names = glob.glob("*")
-    complex_names = [os.path.basename(dir) for dir in complex_names if os.path.isdir(dir)]
+    complex_names = [os.path.basename(d) for d in complex_names if os.path.isdir(d)]
+
+    cofactors_prep = _parse_cofactors_prep_dir(cofactors_prep_dir)
+
     if len(complex_names) == 0:
         print("Do nothing!")
         return None
     print("Generating amber top for ...")
-    for complex in complex_names:
-        print(complex)
-        out_dir = os.path.abspath(complex)
-        _write_tleap_script(LIGAND_PDB_INP, RECEPTOR_PDB_INP, COFACTORS_PREP, out_dir,
-                LIGAND_OUT_PREFIX, RECEPTOR_OUT_PREFIX, COMPLEX_OUT_PREFIX, TLEAP)
+    for complex_name in complex_names:
+        print(complex_name)
+        out_dir = os.path.abspath(complex_name)
+        _write_tleap_script(LIGAND_PDB_INP, RECEPTOR_PDB_INP, cofactors_prep, out_dir,
+                            LIGAND_OUT_PREFIX, RECEPTOR_OUT_PREFIX, COMPLEX_OUT_PREFIX, TLEAP)
 
         tleap_script_file = os.path.join(out_dir, TLEAP)
         _run_tleap(tleap_script_file)
 
     print("Done with Amber")
     print("Checking for failed ...")
-    for complex in complex_names:
-        if os.path.exists(os.path.join(complex, TLEAP_FAILED)):
-            print(complex, TLEAP_FAILED)
+    for complex_name in complex_names:
+        if os.path.exists(os.path.join(complex_name, TLEAP_FAILED)):
+            print(complex_name, TLEAP_FAILED)
     return None
 
