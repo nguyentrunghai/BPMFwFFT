@@ -17,7 +17,7 @@ parser.add_argument("--amber_dir",     type=str, default="amber")
 parser.add_argument("--coord_dir",     type=str, default="min")
 parser.add_argument("--out_dir",     type=str, default="out")
 
-parser.add_argument("--lj_scale",    type=float, default=0.6)
+parser.add_argument("--lj_scale",    type=float, default=0.8)
 parser.add_argument("--spacing",     type=float, default=0.5)
 parser.add_argument("--buffer",      type=float, default=1.0)
 
