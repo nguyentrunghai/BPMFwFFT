@@ -17,7 +17,7 @@ def post_process(rec_prmtop, lig_prmtop, complex_prmtop, sampling_nc_file,
                     sander_tmp_dir, 
                     rec_pdb_out, lig_pdb_out, bpmf_pkl_out):
     post_pro = PostProcess(rec_prmtop, lig_prmtop, complex_prmtop, sampling_nc_file,
-                            SOLVENT_PHASES, nr_resampled_complexes, TEMPERATURE, sander_tmp_dir)
+                            SOLVENT_PHASES, nr_resampled_complexes, False, TEMPERATURE, sander_tmp_dir)
     post_pro.write_rececptor_pdb(rec_pdb_out)
     post_pro.write_resampled_ligand_pdb(lig_pdb_out)
     post_pro.pickle_bpmf(bpmf_pkl_out)
